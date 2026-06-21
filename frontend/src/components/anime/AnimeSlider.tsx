@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState, useCallback } from "react";
-import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import type { Anime } from "@/types/anime";
@@ -13,14 +12,16 @@ import Container from "../shared/Container";
 // ──────────────────────────────────────────────────────────────────────────────
 
 interface AnimeSliderProps {
-  title: string;
-  data: Anime[];
-  viewAllLink?: string;
+  title:            string;
+  subtitle?:        string;   // backend route name, e.g. "GET /api/anime/popular"
+  data:             Anime[];
+  viewAllLink?:     string;
   onAddToPlaylist?: (anime: Anime) => void;
 }
 
 export default function AnimeSlider({
   title,
+  subtitle,
   data,
   viewAllLink,
   onAddToPlaylist,
@@ -55,53 +56,29 @@ export default function AnimeSlider({
     <Container>
       {/* ── Header ───────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-6">
-        <motion.h2
-          className="text-2xl md:text-3xl font-bold text-primary"
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-        >
-          {title}
-        </motion.h2>
+        <div>
+          <h2 className="text-2xl md:text-3xl font-bold text-primary">
+            {title}
+          </h2>
 
-        <div className="flex items-center gap-2">
-          {/* Navigation Arrows */}
-          <button
-            onClick={() => scroll("left")}
-            className={`w-9 h-9 rounded-xl border border-border flex items-center justify-center
-                       transition-all duration-200 cursor-pointer
-                       ${
-                         canScrollLeft
-                           ? "bg-white text-primary hover:bg-surface hover:border-secondary/40"
-                           : "bg-surface text-border cursor-default"
-                       }`}
-            disabled={!canScrollLeft}
-            aria-label="Scroll left"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => scroll("right")}
-            className={`w-9 h-9 rounded-xl border border-border flex items-center justify-center
-                       transition-all duration-200 cursor-pointer
-                       ${
-                         canScrollRight
-                           ? "bg-white text-primary hover:bg-surface hover:border-secondary/40"
-                           : "bg-surface text-border cursor-default"
-                       }`}
-            disabled={!canScrollRight}
-            aria-label="Scroll right"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
+          {/* Route label */}
+          {subtitle && (
+            <p className="text-[11px] font-mono text-secondary/60 mt-1 tracking-wide">
+              {subtitle}
+            </p>
+          )}
+        </div>
 
-          {/* View All Link */}
+        {/* Length of card list and View All Link */}
+        <div className="flex flex-col items-end gap-0.5">
+          <span className="text-[11px] font-semibold text-secondary/50 uppercase tracking-wider">
+            {data.length} {data.length === 1 ? "Title" : "Titles"}
+          </span>
           {viewAllLink && (
             <Link
               href={viewAllLink}
-              className="hidden sm:flex items-center gap-1 text-sm font-medium text-accent
-                         hover:text-accent-secondary transition-colors ml-2"
+              className="flex items-center gap-1 text-sm font-medium text-accent
+                         hover:text-accent-secondary transition-colors"
             >
               View All
               <ArrowRight className="w-4 h-4" />
@@ -110,25 +87,61 @@ export default function AnimeSlider({
         </div>
       </div>
 
-      {/* ── Scroll Container ─────────────────────────────────────────────── */}
-      <div
-        ref={scrollRef}
-        onScroll={checkScroll}
-        className="flex gap-4 overflow-x-auto hide-scrollbar scroll-smooth pb-4"
-        style={{ scrollSnapType: "x mandatory" }}
-      >
-        {data.map((anime, index) => (
-          <motion.div
-            key={anime.id}
-            style={{ scrollSnapAlign: "start" }}
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-40px" }}
-            transition={{ duration: 0.4, delay: index * 0.05 }}
-          >
-            <AnimeCard anime={anime} onAddToPlaylist={onAddToPlaylist} />
-          </motion.div>
-        ))}
+      {/* ── Scroll Container with Floating Navigation ─────────────────────── */}
+      <div className="relative group/slider">
+        {/* Left Floating Button */}
+        <button
+          onClick={() => scroll("left")}
+          className={`absolute -left-3 sm:-left-6 top-1/2 -translate-y-1/2 z-20 group/left-btn
+                     w-12 h-12 rounded-full bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md
+                     border border-border text-primary shadow-[0_8px_24px_rgba(0,0,0,0.08)]
+                     flex items-center justify-center transition-all duration-300 cursor-pointer
+                     hover:bg-white dark:hover:bg-zinc-900 hover:border-accent hover:text-accent 
+                     hover:shadow-[0_8px_24px_rgba(245,158,11,0.2)] active:scale-90
+                     ${
+                       canScrollLeft
+                         ? "opacity-100 scale-100 pointer-events-auto"
+                         : "opacity-0 scale-90 pointer-events-none"
+                     }`}
+          aria-label="Scroll left"
+        >
+          <ChevronLeft className="w-5 h-5 transition-transform duration-250 group-hover/left-btn:-translate-x-0.5" />
+        </button>
+
+        <div
+          ref={scrollRef}
+          onScroll={checkScroll}
+          className="flex gap-4 overflow-x-auto hide-scrollbar scroll-smooth pb-4 px-1"
+          style={{ scrollSnapType: "x mandatory" }}
+        >
+          {data.map((anime) => (
+            <div
+              key={anime.id}
+              style={{ scrollSnapAlign: "start" }}
+            >
+              <AnimeCard anime={anime} onAddToPlaylist={onAddToPlaylist} />
+            </div>
+          ))}
+        </div>
+
+        {/* Right Floating Button */}
+        <button
+          onClick={() => scroll("right")}
+          className={`absolute -right-3 sm:-right-6 top-1/2 -translate-y-1/2 z-20 group/right-btn
+                     w-12 h-12 rounded-full bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md
+                     border border-border text-primary shadow-[0_8px_24px_rgba(0,0,0,0.08)]
+                     flex items-center justify-center transition-all duration-300 cursor-pointer
+                     hover:bg-white dark:hover:bg-zinc-900 hover:border-accent hover:text-accent 
+                     hover:shadow-[0_8px_24px_rgba(245,158,11,0.2)] active:scale-90
+                     ${
+                       canScrollRight
+                         ? "opacity-100 scale-100 pointer-events-auto"
+                         : "opacity-0 scale-90 pointer-events-none"
+                     }`}
+          aria-label="Scroll right"
+        >
+          <ChevronRight className="w-5 h-5 transition-transform duration-250 group-hover/right-btn:translate-x-0.5" />
+        </button>
       </div>
     </Container>
   );

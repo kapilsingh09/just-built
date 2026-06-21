@@ -4,23 +4,41 @@ const KITSU_BASE_URL  = process.env.KITSU_BASE_URL  || "https://kitsu.io/api/edg
 const ANIME_CACHE_TTL = parseInt(process.env.ANIME_CACHE_TTL, 10) || 3600; // 1 hour
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Helper: Transform a single raw Kitsu anime entry into our API shape
+// Helper: Transform a single raw Kitsu anime entry into the shared Anime shape.
 //
-// Kitsu uses JSON:API format — all fields live under anime.attributes.
+// Output is intentionally identical to the Jikan transform so the frontend
+// can use one single interface for all routes — no frontend normalisation needed.
+//
+// Field mapping:
+//   score       ← averageRating (string "78.23") ÷ 10  → number  7.8
+//   year        ← startDate ("2024-10-05")        → 2024
+//   type        ← subtype ("TV", "movie", "OVA")
+//   rating      ← ageRatingGuide (human-readable)  or ageRating fallback
+//   genres      ← [] (Kitsu genre names need a separate API request)
 // ─────────────────────────────────────────────────────────────────────────────
-const transformKitsuAnime = (anime) => ({
-  id:             anime.id,
-  title:          anime.attributes.canonicalTitle       ?? null,
-  synopsis:       anime.attributes.synopsis             ?? null,
-  image:          anime.attributes.posterImage?.large   ?? null,
-  bannerImage:    anime.attributes.coverImage?.original ?? null,
-  rating:         anime.attributes.averageRating        ?? null,
-  episodes:       anime.attributes.episodeCount         ?? null,
-  ageRating:      anime.attributes.ageRating            ?? null,
-  ageRatingGuide: anime.attributes.ageRatingGuide       ?? null,
-  status:         anime.attributes.status               ?? null,
-  startDate:      anime.attributes.startDate            ?? null,
-});
+const transformKitsuAnime = (anime) => {
+  const attrs = anime.attributes;
+
+  return {
+    id:          anime.id,
+    title:       attrs.canonicalTitle                           ?? null,
+    synopsis:    attrs.synopsis                                 ?? null,
+    image:       attrs.posterImage?.large                       ?? null,
+    bannerImage: attrs.coverImage?.original                     ?? null,
+    score:       attrs.averageRating
+                   ? Math.round(parseFloat(attrs.averageRating) / 10 * 10) / 10
+                   : null,
+    episodes:    attrs.episodeCount                             ?? null,
+    status:      attrs.status                                   ?? null,
+    year:        attrs.startDate
+                   ? new Date(attrs.startDate).getFullYear()
+                   : null,
+    season:      null,               // Kitsu does not expose a season label
+    type:        attrs.subtype       ?? null,  // "TV" | "movie" | "OVA" | etc.
+    rating:      attrs.ageRatingGuide ?? attrs.ageRating ?? null,
+    genres:      [],                 // Genre names require a separate Kitsu include
+  };
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helper: Shared cache-aside fetcher for all Kitsu endpoints

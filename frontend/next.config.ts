@@ -6,6 +6,12 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "cdn.myanimelist.net",
+
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "media.kitsu.app",
         pathname: "/**",
       },
     ],

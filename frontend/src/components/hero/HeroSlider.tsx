@@ -83,8 +83,8 @@ export default function HeroSlider({ anime, onAddToPlaylist }: HeroSliderProps) 
           {/* Banner Image */}
           {(currentAnime.bannerImage || currentAnime.image) && (
             <Image
-              src={currentAnime.bannerImage || currentAnime.image}
-              alt={currentAnime.title}
+              src={(currentAnime.bannerImage || currentAnime.image) as string}
+              alt={currentAnime.title || "Anime"}
               fill
               priority
               sizes="100vw"
