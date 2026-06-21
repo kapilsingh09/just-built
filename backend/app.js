@@ -4,8 +4,9 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import { connectDB } from "./db/mongoDb.js";
 import { connectRedis } from "./db/redis.js";
-import authRoutes from "./routes/authRoutes.js";
-import animeRoutes from "./routes/animeRoutes.js";
+import authRoutes        from "./routes/authRoutes.js";
+import jikanAnimeRoutes  from "./routes/jikanAnimeRoutes.js";
+import kitsuAnimeRoutes  from "./routes/kitsuAnimeRoutes.js";
 
 const app = express();
 
@@ -24,8 +25,9 @@ app.get("/", (req, res) => {
 });
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
-app.use("/api/auth", authRoutes);
-app.use("/api/anime", animeRoutes);
+app.use("/api/auth",  authRoutes);        // Auth endpoints
+app.use("/api/jikan", jikanAnimeRoutes);   // GET /api/jikan/popular  (Jikan / MAL)
+app.use("/api/anime", kitsuAnimeRoutes);   // GET /api/anime/popular|top-rated|latest (Kitsu)
 
 // ─── Global Error Handler ─────────────────────────────────────────────────────
 app.use((err, req, res, next) => {
