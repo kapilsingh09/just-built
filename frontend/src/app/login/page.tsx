@@ -2,37 +2,43 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { Mail, Lock, Loader2 } from 'lucide-react';
+
 import { axiosInstance } from '@/lib/axios';
 import { useAuthStore } from '@/store/authStore';
-import Link from 'next/link';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('karand005@mail.com');
   const [password, setPassword] = useState('password');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
   const router = useRouter();
   const { setAuth } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     setIsLoading(true);
     setError('');
 
     try {
-      // 1. Login to get tokens
-      const loginRes = await axiosInstance.post('/auth/login', { email, password });
-      const accessToken = loginRes.data.accessToken;
-
-      // 2. Fetch user profile
-      const userRes = await axiosInstance.get('/auth/me', {
-        headers: { Authorization: `Bearer ${accessToken}` }
+      const loginRes = await axiosInstance.post('/auth/login', {
+        email,
+        password,
       });
 
-      // 3. Update global state
+      const accessToken = loginRes.data.accessToken;
+
+      const userRes = await axiosInstance.get('/auth/me', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
       setAuth(userRes.data.user, accessToken);
 
-      // 4. Redirect to profile
       router.push('/profile');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to login');
@@ -42,55 +48,194 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center pt-20">
-      <div className="w-full max-w-md p-8 bg-white dark:bg-gray-900 rounded-2xl shadow-xl ring-1 ring-gray-900/5">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold">Welcome back</h2>
-          <p className="text-gray-500 dark:text-gray-400 mt-2">Sign in to your account</p>
+    <section className="min-h-screen bg-[#0B0B0B] flex items-center justify-center px-6 py-20">
+
+      {/* Background Blur */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 left-20 h-72 w-72 rounded-full bg-orange-500/10 blur-[140px]" />
+        <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-orange-600/10 blur-[180px]" />
+      </div>
+
+      <div className="relative w-full max-w-md">
+
+        <div className="rounded-3xl border border-white/10 bg-[#161616]/90 backdrop-blur-xl p-8 shadow-2xl">
+
+          {/* Logo */}
+
+          <div className="flex justify-center mb-8">
+
+            <div className="flex items-center gap-3">
+
+              <div className="h-12 w-12 rounded-xl bg-[#F47521] flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-orange-500/30">
+                A
+              </div>
+
+              <div>
+                <h1 className="text-2xl font-black text-white">
+                  Ani
+                  <span className="text-[#F47521]">
+                    Verse
+                  </span>
+                </h1>
+
+                <p className="text-xs text-gray-400">
+                  Stream Your Favorite Anime
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+
+          <div className="mb-8 text-center">
+
+            <h2 className="text-3xl font-bold text-white">
+              Welcome Back
+            </h2>
+
+            <p className="mt-2 text-gray-400">
+              Login to continue watching anime
+            </p>
+
+          </div>
+
+          {error && (
+            <div className="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+
+            {/* Email */}
+
+            <div>
+
+              <label className="mb-2 block text-sm font-medium text-gray-300">
+                Email
+              </label>
+
+              <div className="relative">
+
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
+
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@example.com"
+                  className="
+                  w-full
+                  rounded-xl
+                  border
+                  border-white/10
+                  bg-[#1D1D1D]
+                  py-3
+                  pl-12
+                  pr-4
+                  text-white
+                  placeholder:text-gray-500
+                  outline-none
+                  transition
+                  focus:border-[#F47521]
+                  focus:ring-2
+                  focus:ring-[#F47521]/30
+                "
+                />
+
+              </div>
+
+            </div>
+
+            {/* Password */}
+
+            <div>
+
+              <label className="mb-2 block text-sm font-medium text-gray-300">
+                Password
+              </label>
+
+              <div className="relative">
+
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
+
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="
+                  w-full
+                  rounded-xl
+                  border
+                  border-white/10
+                  bg-[#1D1D1D]
+                  py-3
+                  pl-12
+                  pr-4
+                  text-white
+                  placeholder:text-gray-500
+                  outline-none
+                  transition
+                  focus:border-[#F47521]
+                  focus:ring-2
+                  focus:ring-[#F47521]/30
+                "
+                />
+
+              </div>
+
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="
+              flex
+              w-full
+              items-center
+              justify-center
+              gap-2
+              rounded-xl
+              bg-[#F47521]
+              py-3
+              font-semibold
+              text-white
+              transition
+              hover:scale-[1.02]
+              hover:bg-orange-500
+              disabled:opacity-60
+            "
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Signing In...
+                </>
+              ) : (
+                'Sign In'
+              )}
+            </button>
+
+            <div className="text-center text-sm text-gray-400">
+
+              Don't have an account?
+
+              <Link
+                href="/register"
+                className="ml-2 font-semibold text-[#F47521] hover:text-orange-400"
+              >
+                Create Account
+              </Link>
+
+            </div>
+
+          </form>
+
         </div>
 
-        {error && (
-          <div className="mb-4 p-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block mb-2 text-sm font-medium">Your email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-              placeholder="name@company.com"
-              required
-            />
-          </div>
-          <div>
-            <label className="block mb-2 text-sm font-medium">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-              placeholder="••••••••"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 disabled:opacity-50"
-          >
-            {isLoading ? 'Signing in...' : 'Sign in'}
-          </button>
-
-          <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-            Don’t have an account yet? <Link href="/register" className="font-medium text-blue-600 hover:underline dark:text-blue-500">Sign up</Link>
-          </p>
-        </form>
       </div>
-    </div>
+
+    </section>
   );
 }
