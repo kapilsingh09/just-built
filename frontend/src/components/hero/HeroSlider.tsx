@@ -20,6 +20,7 @@ interface HeroSliderProps {
 export default function HeroSlider({ anime, onAddToPlaylist }: HeroSliderProps) {
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(1);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const slideCount = anime.length;
 
@@ -34,11 +35,13 @@ export default function HeroSlider({ anime, onAddToPlaylist }: HeroSliderProps) 
   const next = useCallback(() => {
     setDirection(1);
     setCurrent((prev) => (prev + 1) % slideCount);
+    setIsExpanded(false);
   }, [slideCount]);
 
   const prev = useCallback(() => {
     setDirection(-1);
     setCurrent((prev) => (prev - 1 + slideCount) % slideCount);
+    setIsExpanded(false);
   }, [slideCount]);
 
   // Auto-advance every 6s
@@ -88,7 +91,7 @@ export default function HeroSlider({ anime, onAddToPlaylist }: HeroSliderProps) 
               fill
               priority
               sizes="100vw"
-              className="object-cover"
+              className="object-cover "
             />
           )}
 
@@ -105,16 +108,16 @@ export default function HeroSlider({ anime, onAddToPlaylist }: HeroSliderProps) 
           <AnimatePresence mode="wait">
             <motion.div
               key={current}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
+              initial={{ opacity: 0, y: 30, filter: "blur(8px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, y: -20, filter: "blur(8px)" }}
               transition={{ duration: 0.5, delay: 0.2 }}
               className="max-w-2xl"
             >
               {/* Badges Row */}
               <div className="flex flex-wrap items-center gap-2 mb-4">
                 {currentAnime.type && (
-                  <span className="badge-base bg-accent/90 text-white text-xs font-semibold">
+                  <span className="badge-base bg-[#F47521] text-white text-xs font-semibold">
                     {currentAnime.type}
                   </span>
                 )}
@@ -145,9 +148,27 @@ export default function HeroSlider({ anime, onAddToPlaylist }: HeroSliderProps) 
 
               {/* Description */}
               {currentAnime.synopsis && (
-                <p className="text-white/80 text-sm sm:text-base leading-relaxed line-clamp-3 mb-5 max-w-xl">
-                  {currentAnime.synopsis}
-                </p>
+                <div className="mb-5 max-w-xl">
+                  <div
+                    className={`text-white/80 text-sm sm:text-base leading-relaxed pr-1 transition-all duration-300 ${
+                      isExpanded
+                        ? "max-h-40 overflow-y-auto"
+                        : "line-clamp-3"
+                    }`}
+                    style={{
+                      scrollbarWidth: "thin",
+                      scrollbarColor: "rgba(255,255,255,0.2) transparent",
+                    }}
+                  >
+                    {currentAnime.synopsis}
+                  </div>
+                  <button
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="mt-2 text-sm font-semibold text-[#F47521] hover:text-white transition-colors cursor-pointer"
+                  >
+                    {isExpanded ? "See Less" : "See More"}
+                  </button>
+                </div>
               )}
 
               {/* Genres */}
@@ -167,20 +188,20 @@ export default function HeroSlider({ anime, onAddToPlaylist }: HeroSliderProps) 
               {/* CTA Buttons */}
               <div className="flex items-center gap-3">
                 <Button
-                  variant="primary"
+                  variant="secondary"
                   size="lg"
-                  icon={<Play className="w-5 h-5" fill="currentColor" />}
+                  icon={<Play className="w-5 h-5 " fill="currentColor" />}
                 >
                   Watch Now
                 </Button>
                 <Button
-                  variant="secondary"
+                  // variant="secondary"
                   size="lg"
-                  icon={<Plus className="w-5 h-5" />}
+                  // icon={<Plus className="w-5 h-5" />}
                   className="!bg-white/15 !border-white/25 !text-white hover:!bg-white/25 backdrop-blur-sm"
                   onClick={() => onAddToPlaylist?.(currentAnime)}
                 >
-                  Add To Playlist
+                  Add To List
                 </Button>
               </div>
             </motion.div>
@@ -189,24 +210,24 @@ export default function HeroSlider({ anime, onAddToPlaylist }: HeroSliderProps) 
       </div>
 
       {/* ── Navigation Arrows — bottom-right, hidden on mobile ──────────── */}
-      <div className=" absolute  bottom-20 right-8 z-20 items-center gap-2">
+      <div className=" absolute flex flex-col bottom-20 right-8 z-20 items-center gap-2">
         <button
           onClick={prev}
-          className="w-11 h-11 mb-3  rounded-md bg-white/10 backdrop-blur-sm border border-white/20
+          className="w-14 h-14  rounded-xl bg-white/10 backdrop-blur-sm border border-white/20
                      flex items-center justify-center text-white
                      hover:bg-white/20 transition-all duration-200 cursor-pointer"
           aria-label="Previous slide"
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft className="w-6 h-5" />
         </button>
         <button
           onClick={next}
-          className="w-11 h-11 mb-3  rounded-full bg-white/10 backdrop-blur-sm border border-white/20
+          className="w-14 h-14 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20
                      flex items-center justify-center text-white
                      hover:bg-white/20 transition-all duration-200 cursor-pointer"
           aria-label="Next slide"
         >
-          <ChevronRight className="w-5 h-5" />
+          <ChevronRight className="w-6 h-6" />
         </button>
       </div>
 
@@ -217,8 +238,8 @@ export default function HeroSlider({ anime, onAddToPlaylist }: HeroSliderProps) 
             key={i}
             onClick={() => goTo(i)}
             className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${i === current
-                ? "w-8 bg-accent"
-                : "w-3 bg-white/40 hover:bg-white/60"
+              ? "w-8 border-3 bg-white "
+              : "w-3 bg-white/40 hover:bg-white/60"
               }`}
             aria-label={`Go to slide ${i + 1}`}
           />

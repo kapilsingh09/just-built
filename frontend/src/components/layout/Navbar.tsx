@@ -62,16 +62,12 @@ export default function Navbar() {
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3">
 
-              <div className="w-10 h-10 rounded-xl bg-[#F47521] flex items-center justify-center shadow-lg shadow-orange-500/30">
-                <span className="text-white text-lg font-bold">
-                  A
-                </span>
-              </div>
+
 
               <span className="text-2xl font-black tracking-tight text-white">
-                Ani
-                <span className="text-[#F47521]">
-                  Verse
+                Your
+                <span className="bg-[#F47521] ml-1 rounded text-black px-0.5 py-0.5">
+                  anilist
                 </span>
               </span>
 
@@ -106,7 +102,7 @@ export default function Navbar() {
               >
                 <span>Search</span>
                 {searchOpen && (
-                    <span className="absolute bottom-4 left-2 right-2 h-1 bg-[#ffffff] w-16  rounded-full" />
+                  <span className="absolute bottom-4 left-2 right-2 h-1 bg-[#ffffff] w-16  rounded-full" />
                 )}
               </button>
 
@@ -121,7 +117,7 @@ export default function Navbar() {
               >
                 <span>Explore</span>
                 {pathname === "/explore" && (
-                    <span className="absolute bottom-4 left-2 right-2 h-1 bg-[#ffffff] w-16  rounded-full" />
+                  <span className="absolute bottom-4 left-2 right-2 h-1 bg-[#ffffff] w-16  rounded-full" />
                 )}
               </Link>
 
@@ -236,10 +232,10 @@ export default function Navbar() {
 
             <div className="border-t border-white/10 pt-4">
 
-<Link
-  href="/login"
-  onClick={() => setMobileOpen(false)}
-  className="
+              <Link
+                href="/login"
+                onClick={() => setMobileOpen(false)}
+                className="
     block
     rounded-2xl
     border
@@ -259,9 +255,9 @@ export default function Navbar() {
     hover:shadow-[0_12px_40px_rgba(255,255,255,0.08)]
     active:scale-[0.98]
   "
->
-  Login
-</Link>
+              >
+                Login
+              </Link>
             </div>
 
           </div>

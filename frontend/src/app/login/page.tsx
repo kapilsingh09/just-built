@@ -48,55 +48,37 @@ export default function LoginPage() {
   };
 
   return (
-    <section className="min-h-screen bg-[#0B0B0B] flex items-center justify-center px-6 py-20">
-
-      {/* Background Blur */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 left-20 h-72 w-72 rounded-full bg-orange-500/10 blur-[140px]" />
-        <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-orange-600/10 blur-[180px]" />
-      </div>
+    <section className="min-h-screen bg-zinc-900 flex items-center justify-center px-6 py-20">
 
       <div className="relative w-full max-w-md">
 
-        <div className="rounded-3xl border border-white/10 bg-[#161616]/90 backdrop-blur-xl p-8 shadow-2xl">
+        <div className="rounded-2xl border border-white/10 bg-zinc-800/80 backdrop-blur-xl p-8 shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
 
           {/* Logo */}
-
           <div className="flex justify-center mb-8">
-
             <div className="flex items-center gap-3">
-
               <div className="h-12 w-12 rounded-xl bg-[#F47521] flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-orange-500/30">
                 A
               </div>
-
               <div>
                 <h1 className="text-2xl font-black text-white">
                   Ani
-                  <span className="text-[#F47521]">
-                    Verse
-                  </span>
+                  <span className="text-[#F47521]">Verse</span>
                 </h1>
-
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-zinc-400">
                   Stream Your Favorite Anime
                 </p>
               </div>
-
             </div>
-
           </div>
 
           <div className="mb-8 text-center">
-
             <h2 className="text-3xl font-bold text-white">
               Welcome Back
             </h2>
-
-            <p className="mt-2 text-gray-400">
+            <p className="mt-2 text-zinc-400">
               Login to continue watching anime
             </p>
-
           </div>
 
           {error && (
@@ -108,104 +90,61 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
 
             {/* Email */}
-
             <div>
-
-              <label className="mb-2 block text-sm font-medium text-gray-300">
+              <label className="mb-2 block text-sm font-medium text-zinc-300">
                 Email
               </label>
-
               <div className="relative">
-
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
-
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 w-5 h-5" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
                   className="
-                  w-full
-                  rounded-xl
-                  border
-                  border-white/10
-                  bg-[#1D1D1D]
-                  py-3
-                  pl-12
-                  pr-4
-                  text-white
-                  placeholder:text-gray-500
-                  outline-none
-                  transition
-                  focus:border-[#F47521]
-                  focus:ring-2
-                  focus:ring-[#F47521]/30
-                "
+                    w-full rounded-xl border border-white/10 bg-zinc-900
+                    py-3 pl-12 pr-4 text-white placeholder:text-zinc-500
+                    outline-none transition
+                    focus:border-white/30 focus:ring-2 focus:ring-white/10
+                  "
                 />
-
               </div>
-
             </div>
 
             {/* Password */}
-
             <div>
-
-              <label className="mb-2 block text-sm font-medium text-gray-300">
+              <label className="mb-2 block text-sm font-medium text-zinc-300">
                 Password
               </label>
-
               <div className="relative">
-
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
-
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 w-5 h-5" />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   className="
-                  w-full
-                  rounded-xl
-                  border
-                  border-white/10
-                  bg-[#1D1D1D]
-                  py-3
-                  pl-12
-                  pr-4
-                  text-white
-                  placeholder:text-gray-500
-                  outline-none
-                  transition
-                  focus:border-[#F47521]
-                  focus:ring-2
-                  focus:ring-[#F47521]/30
-                "
+                    w-full rounded-xl border border-white/10 bg-zinc-900
+                    py-3 pl-12 pr-4 text-white placeholder:text-zinc-500
+                    outline-none transition
+                    focus:border-white/30 focus:ring-2 focus:ring-white/10
+                  "
                 />
-
               </div>
-
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
               className="
-              flex
-              w-full
-              items-center
-              justify-center
-              gap-2
-              rounded-xl
-              bg-[#F47521]
-              py-3
-              font-semibold
-              text-white
-              transition
-              hover:scale-[1.02]
-              hover:bg-orange-500
-              disabled:opacity-60
-            "
+                flex w-full items-center justify-center gap-2
+                rounded-xl border border-white/20 bg-white/10
+                backdrop-blur-md py-3 font-semibold text-white
+                transition-all duration-300
+                hover:bg-white/15 hover:border-white/30
+                active:scale-[0.98] disabled:opacity-60
+                cursor-pointer
+              "
             >
               {isLoading ? (
                 <>
@@ -217,17 +156,14 @@ export default function LoginPage() {
               )}
             </button>
 
-            <div className="text-center text-sm text-gray-400">
-
-              Don't have an account?
-
+            <div className="text-center text-sm text-zinc-400">
+              Don&apos;t have an account?
               <Link
                 href="/register"
-                className="ml-2 font-semibold text-[#F47521] hover:text-orange-400"
+                className="ml-2 font-semibold text-white hover:text-zinc-300 transition-colors"
               >
                 Create Account
               </Link>
-
             </div>
 
           </form>
