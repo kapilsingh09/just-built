@@ -188,27 +188,27 @@ export default function HeroSlider({ anime, onAddToPlaylist }: HeroSliderProps) 
         </div>
       </div>
 
-      {/* ── Navigation Arrows ────────────────────────────────────────────── */}
-      <button
-        onClick={prev}
-        className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20
-                   w-11 h-11 rounded-full bg-white/10 backdrop-blur-sm border border-white/20
-                   flex items-center justify-center text-white
-                   hover:bg-white/20 transition-all duration-200 cursor-pointer"
-        aria-label="Previous slide"
-      >
-        <ChevronLeft className="w-5 h-5" />
-      </button>
-      <button
-        onClick={next}
-        className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-20
-                   w-11 h-11 rounded-full bg-white/10 backdrop-blur-sm border border-white/20
-                   flex items-center justify-center text-white
-                   hover:bg-white/20 transition-all duration-200 cursor-pointer"
-        aria-label="Next slide"
-      >
-        <ChevronRight className="w-5 h-5" />
-      </button>
+      {/* ── Navigation Arrows — bottom-right, hidden on mobile ──────────── */}
+      <div className=" absolute  bottom-20 right-8 z-20 items-center gap-2">
+        <button
+          onClick={prev}
+          className="w-11 h-11 mb-3  rounded-md bg-white/10 backdrop-blur-sm border border-white/20
+                     flex items-center justify-center text-white
+                     hover:bg-white/20 transition-all duration-200 cursor-pointer"
+          aria-label="Previous slide"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        <button
+          onClick={next}
+          className="w-11 h-11 mb-3  rounded-full bg-white/10 backdrop-blur-sm border border-white/20
+                     flex items-center justify-center text-white
+                     hover:bg-white/20 transition-all duration-200 cursor-pointer"
+          aria-label="Next slide"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
+      </div>
 
       {/* ── Dots ─────────────────────────────────────────────────────────── */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
@@ -216,18 +216,17 @@ export default function HeroSlider({ anime, onAddToPlaylist }: HeroSliderProps) 
           <button
             key={i}
             onClick={() => goTo(i)}
-            className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-              i === current
+            className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${i === current
                 ? "w-8 bg-accent"
                 : "w-3 bg-white/40 hover:bg-white/60"
-            }`}
+              }`}
             aria-label={`Go to slide ${i + 1}`}
           />
         ))}
       </div>
 
       {/* ── Progress Bar ─────────────────────────────────────────────────── */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 h-0.5 bg-white/10">
+      {/* <div className="absolute bottom-0 left-0 right-0 z-20 h-0.5 bg-white/10">
         <motion.div
           key={current}
           className="h-full bg-accent"
@@ -235,7 +234,7 @@ export default function HeroSlider({ anime, onAddToPlaylist }: HeroSliderProps) 
           animate={{ width: "100%" }}
           transition={{ duration: 6, ease: "linear" }}
         />
-      </div>
+      </div> */}
     </section>
   );
 }

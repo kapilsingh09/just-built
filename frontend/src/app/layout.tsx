@@ -13,7 +13,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "AniVerse — Discover Your Next Anime",
+  title: "Your anilist",
   description:
     "Your personal anime discovery platform. Explore trending, popular, and top-rated anime. Build playlists and track your watchlist.",
 };

@@ -23,14 +23,14 @@ import { AlertCircle } from "lucide-react";
 
 export default function Home() {
   // ── Data hooks — one per backend route ────────────────────────────────────
-  const jikanPopular  = useJikanPopular();   // GET /api/jikan/popular
-  const kitsuPopular  = useKitsuPopular();   // GET /api/anime/popular
+  const jikanPopular = useJikanPopular();   // GET /api/jikan/popular
+  const kitsuPopular = useKitsuPopular();   // GET /api/anime/popular
   const kitsuTopRated = useKitsuTopRated();  // GET /api/anime/top-rated
-  const kitsuLatest   = useKitsuLatest();    // GET /api/anime/latest
+  const kitsuLatest = useKitsuLatest();    // GET /api/anime/latest
 
   // ── Playlist modal ────────────────────────────────────────────────────────
   const [playlistAnime, setPlaylistAnime] = useState<Anime | null>(null);
-  const [playlistOpen,  setPlaylistOpen]  = useState(false);
+  const [playlistOpen, setPlaylistOpen] = useState(false);
 
   const handleAddToPlaylist = (anime: Anime) => {
     setPlaylistAnime(anime);
@@ -42,8 +42,8 @@ export default function Home() {
 
   // ── Global loading — wait for the two most important sections ─────────────
   const coreLoading = jikanPopular.isLoading || kitsuPopular.isLoading;
-  const anyError    = jikanPopular.isError   || kitsuPopular.isError;
-  const firstError  = jikanPopular.error     || kitsuPopular.error;
+  const anyError = jikanPopular.isError || kitsuPopular.isError;
+  const firstError = jikanPopular.error || kitsuPopular.error;
 
   if (coreLoading) {
     return (
