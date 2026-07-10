@@ -92,11 +92,11 @@ export default function AnimeSlider({
         {/* Left Floating Button */}
         <button
           onClick={() => scroll("left")}
-          className={`absolute -left-3 sm:-left-6 top-1/2 -translate-y-1/2 z-20 group/left-btn
-                     w-12 h-12 rounded-full bg-white/90 backdrop-blur-md
-                     border border-border text-primary shadow-[0_8px_24px_rgba(0,0,0,0.08)]
+          className={`absolute -left-4 sm:-left-6 top-1/2 -translate-y-1/2 z-20 group/left-btn
+                     w-12 h-12 rounded-full bg-black/40 backdrop-blur-md
+                     border border-white/10 text-white shadow-[0_8px_24px_rgba(0,0,0,0.3)]
                      flex items-center justify-center transition-all duration-300 cursor-pointer
-                     hover:bg-white dark:hover:bg-zinc-900 hover:border-accent hover:text-accent 
+                     hover:bg-white/20 hover:border-accent hover:text-accent 
                      hover:shadow-[0_8px_24px_rgba(245,158,11,0.2)] active:scale-90
                      ${canScrollLeft
               ? "opacity-100 scale-100 pointer-events-auto"
@@ -104,7 +104,7 @@ export default function AnimeSlider({
             }`}
           aria-label="Scroll left"
         >
-          <ChevronLeft className="w-5 h-5 transition-transform duration-250 group-hover/left-btn:-translate-x-0.5" />
+          <ChevronLeft className="w-6 h-6 transition-transform duration-250 group-hover/left-btn:-translate-x-0.5" />
         </button>
 
         <div
@@ -126,8 +126,8 @@ export default function AnimeSlider({
         {/* Right Floating Button */}
         <button
           onClick={() => scroll("right")}
-          className={`absolute right-4 top-1/2 -translate-y-1/2 z-20 group/right-btn
-                     w-12 h-12 rounded-full bg-white/10 backdrop-blur-md
+          className={`absolute right-0 sm:-right-6 top-1/2 -translate-y-1/2 z-20 group/right-btn
+                     w-12 h-12 rounded-full bg-black/40 backdrop-blur-md
                      border border-white/10 text-white shadow-[0_8px_24px_rgba(0,0,0,0.3)]
                      flex items-center justify-center transition-all duration-300 cursor-pointer
                      hover:bg-white/20 hover:border-accent hover:text-accent 
@@ -138,7 +138,7 @@ export default function AnimeSlider({
             }`}
           aria-label="Scroll right"
         >
-          <ChevronRight className="w-5 h-5 transition-transform duration-250 group-hover/right-btn:translate-x-0.5" />
+          <ChevronRight className="w-6 h-6 transition-transform duration-250 group-hover/right-btn:translate-x-0.5" />
         </button>
       </div>
     </Container>

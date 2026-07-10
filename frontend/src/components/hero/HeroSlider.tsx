@@ -70,7 +70,7 @@ export default function HeroSlider({ anime, onAddToPlaylist }: HeroSliderProps) 
   };
 
   return (
-    <section className="relative w-full h-[90vh] min-h-[600px] overflow-hidden bg-primary">
+    <section className="relative w-full h-[90vh] min-h-[600px] overflow-hidden bg-black">
       {/* ── Background Image Slides ──────────────────────────────────────── */}
       <AnimatePresence initial={false} custom={direction} mode="popLayout">
         <motion.div
@@ -80,7 +80,7 @@ export default function HeroSlider({ anime, onAddToPlaylist }: HeroSliderProps) 
           initial="enter"
           animate="center"
           exit="exit"
-          transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
+          transition={{ duration: 0.8, ease: "easeInOut" }}
           className="absolute inset-0"
         >
           {/* Banner Image */}
@@ -108,101 +108,103 @@ export default function HeroSlider({ anime, onAddToPlaylist }: HeroSliderProps) 
           <AnimatePresence mode="wait">
             <motion.div
               key={current}
-              initial={{ opacity: 0, y: 30, filter: "blur(8px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: -20, filter: "blur(8px)" }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="max-w-2xl"
+              initial={{ opacity: 0, filter: "blur(12px)" }}
+              animate={{ opacity: 1, filter: "blur(0px)" }}
+              exit={{ opacity: 0, filter: "blur(12px)" }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="max-w-2xl relative"
             >
-              {/* Badges Row */}
-              <div className="flex flex-wrap items-center gap-2 mb-4">
-                {currentAnime.type && (
-                  <span className="badge-base bg-[#F47521] text-white text-xs font-semibold">
-                    {currentAnime.type}
-                  </span>
-                )}
-                {currentAnime.score && (
-                  <span className="badge-base bg-white/15 backdrop-blur-sm text-white border border-white/20">
-                    <Star className="w-3 h-3 text-accent" fill="currentColor" />
-                    {currentAnime.score.toFixed(1)}
-                  </span>
-                )}
-                {currentAnime.year && (
-                  <span className="badge-base bg-white/15 backdrop-blur-sm text-white border border-white/20">
-                    <Calendar className="w-3 h-3" />
-                    {currentAnime.year}
-                  </span>
-                )}
-                {currentAnime.episodes && (
-                  <span className="badge-base bg-white/15 backdrop-blur-sm text-white border border-white/20">
-                    <Tv className="w-3 h-3" />
-                    {currentAnime.episodes} Episodes
-                  </span>
-                )}
-              </div>
+              {/* Soft blur blob behind text for readability without a visible box */}
+              <div className="absolute -inset-8 md:-inset-12 bg-black/40 blur-[40px] rounded-full pointer-events-none" />
 
-              {/* Title */}
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white leading-tight mb-4 drop-shadow-lg">
-                {currentAnime.title}
-              </h1>
+              <div className="relative z-10">
 
-              {/* Description */}
-              {currentAnime.synopsis && (
-                <div className="mb-5 max-w-xl">
-                  <div
-                    className={`text-white/80 text-sm sm:text-base leading-relaxed pr-1 transition-all duration-300 ${
-                      isExpanded
-                        ? "max-h-40 overflow-y-auto"
-                        : "line-clamp-3"
-                    }`}
-                    style={{
-                      scrollbarWidth: "thin",
-                      scrollbarColor: "rgba(255,255,255,0.2) transparent",
-                    }}
-                  >
-                    {currentAnime.synopsis}
-                  </div>
-                  <button
-                    onClick={() => setIsExpanded(!isExpanded)}
-                    className="mt-2 text-sm font-semibold text-[#F47521] hover:text-white transition-colors cursor-pointer"
-                  >
-                    {isExpanded ? "See Less" : "See More"}
-                  </button>
-                </div>
-              )}
-
-              {/* Genres */}
-              {currentAnime.genres.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-8">
-                  {currentAnime.genres.slice(0, 4).map((g) => (
-                    <span
-                      key={g}
-                      className="badge-base bg-white/10 backdrop-blur-sm text-white/90 border border-white/15 text-xs"
-                    >
-                      {g}
+                <div className="flex flex-wrap items-center gap-2 mb-4">
+                  {currentAnime.type && (
+                    <span className="badge-base bg-[#F47521] text-white text-xs font-semibold">
+                      {currentAnime.type}
                     </span>
-                  ))}
+                  )}
+                  {currentAnime.score && (
+                    <span className="badge-base bg-white/15 backdrop-blur-sm text-white border border-white/20">
+                      <Star className="w-3 h-3 text-accent" fill="currentColor" />
+                      {currentAnime.score.toFixed(1)}
+                    </span>
+                  )}
+                  {currentAnime.year && (
+                    <span className="badge-base bg-white/15 backdrop-blur-sm text-white border border-white/20">
+                      <Calendar className="w-3 h-3" />
+                      {currentAnime.year}
+                    </span>
+                  )}
+                  {currentAnime.episodes && (
+                    <span className="badge-base bg-white/15 backdrop-blur-sm text-white border border-white/20">
+                      <Tv className="w-3 h-3" />
+                      {currentAnime.episodes} Episodes
+                    </span>
+                  )}
                 </div>
-              )}
 
-              {/* CTA Buttons */}
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  icon={<Play className="w-5 h-5 " fill="currentColor" />}
-                >
-                  Watch Now
-                </Button>
-                <Button
-                  // variant="secondary"
-                  size="lg"
-                  // icon={<Plus className="w-5 h-5" />}
-                  className="!bg-white/15 !border-white/25 !text-white hover:!bg-white/25 backdrop-blur-sm"
-                  onClick={() => onAddToPlaylist?.(currentAnime)}
-                >
-                  Add To List
-                </Button>
+                {/* Title */}
+                <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white leading-tight mb-4 drop-shadow-lg">
+                  {currentAnime.title}
+                </h1>
+
+                {/* Description */}
+                {currentAnime.synopsis && (
+                  <div className="mb-5 max-w-xl">
+                    <div
+                      className={`text-white/80 text-sm sm:text-base leading-relaxed pr-1 transition-all duration-300 ${isExpanded
+                          ? "max-h-40 overflow-y-auto"
+                          : "line-clamp-3"
+                        }`}
+                      style={{
+                        scrollbarWidth: "thin",
+                        scrollbarColor: "rgba(255,255,255,0.2) transparent",
+                      }}
+                    >
+                      {currentAnime.synopsis}
+                    </div>
+                    <button
+                      onClick={() => setIsExpanded(!isExpanded)}
+                      className="mt-2 text-sm font-semibold text-[#F47521] hover:text-white transition-colors cursor-pointer"
+                    >
+                      {isExpanded ? "See Less" : "See More"}
+                    </button>
+                  </div>
+                )}
+
+                {/* Genres */}
+                {currentAnime.genres.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-8">
+                    {currentAnime.genres.slice(0, 4).map((g) => (
+                      <span
+                        key={g}
+                        className="badge-base bg-white/10 backdrop-blur-sm text-white/90 border border-white/15 text-xs"
+                      >
+                        {g}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* CTA Buttons */}
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    icon={<Play className="w-5 h-5 " fill="currentColor" />}
+                  >
+                    Watch Now
+                  </Button>
+                  <Button
+                    size="lg"
+                    className="!bg-white/15 !border-white/25 !text-white hover:!bg-white/25 backdrop-blur-sm"
+                    onClick={() => onAddToPlaylist?.(currentAnime)}
+                  >
+                    Add To List
+                  </Button>
+                </div>
               </div>
             </motion.div>
           </AnimatePresence>
@@ -210,21 +212,21 @@ export default function HeroSlider({ anime, onAddToPlaylist }: HeroSliderProps) 
       </div>
 
       {/* ── Navigation Arrows — bottom-right, hidden on mobile ──────────── */}
-      <div className=" absolute flex flex-col bottom-20 right-8 z-20 items-center gap-2">
+      <div className=" absolute flex flex-col bottom-20 right-8 z-20 items-center gap-3">
         <button
           onClick={prev}
-          className="w-14 h-14  rounded-xl bg-white/10 backdrop-blur-sm border border-white/20
-                     flex items-center justify-center text-white
-                     hover:bg-white/20 transition-all duration-200 cursor-pointer"
+          className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md border border-white/20
+                     flex items-center justify-center text-white shadow-lg
+                     hover:bg-white/25 hover:scale-105 transition-all duration-300 cursor-pointer active:scale-95"
           aria-label="Previous slide"
         >
-          <ChevronLeft className="w-6 h-5" />
+          <ChevronLeft className="w-6 h-6" />
         </button>
         <button
           onClick={next}
-          className="w-14 h-14 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20
-                     flex items-center justify-center text-white
-                     hover:bg-white/20 transition-all duration-200 cursor-pointer"
+          className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md border border-white/20
+                     flex items-center justify-center text-white shadow-lg
+                     hover:bg-white/25 hover:scale-105 transition-all duration-300 cursor-pointer active:scale-95"
           aria-label="Next slide"
         >
           <ChevronRight className="w-6 h-6" />
