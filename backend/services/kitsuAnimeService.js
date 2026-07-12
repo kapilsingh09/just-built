@@ -280,3 +280,133 @@ export const getKitsuSeasonalPopular = async () => {
 
   return { data: finalData, source: "api", season, year };
 };
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                      getKitsuAnimeById                                      ║
+// ║  GET /api/anime/:id                                                         ║
+// ║                                                                             ║
+// ║  Returns FULL detail for a single Kitsu anime by its Kitsu ID.              ║
+// ║  Includes genres via ?include=categories (resolved from `included` array).  ║
+// ║                                                                             ║
+// ║  Cache key : kitsu:detail:{id}   TTL: 6 hours                              ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+export const getKitsuAnimeById = async (id) => {
+  const cacheKey  = `kitsu:detail:${id}`;
+  const DETAIL_TTL = 21600; // 6 hours
+
+  // ── Step 1: Check Redis ────────────────────────────────────────────────────
+  const cached = await redisService.get(cacheKey);
+  if (cached) {
+    console.log(`[kitsuAnimeService] Cache HIT  — getKitsuAnimeById (key: ${cacheKey})`);
+    return { data: cached, source: "cache" };
+  }
+
+  // ── Step 2: Fetch from Kitsu with genres included ─────────────────────────
+  console.log(`[kitsuAnimeService] Cache MISS — getKitsuAnimeById (key: ${cacheKey}) — fetching Kitsu API`);
+
+  const url = `${KITSU_BASE_URL}/anime/${id}?include=categories`;
+  const response = await fetch(url, {
+    headers: { Accept: "application/vnd.api+json" },
+  });
+
+  if (!response.ok) {
+    const error    = new Error(`Kitsu API returned status ${response.status}`);
+    error.status   = response.status === 404 ? 404 : 502;
+    throw error;
+  }
+
+  const json = await response.json();
+
+  if (!json.data) {
+    const error  = new Error("Unexpected response shape from Kitsu API");
+    error.status = 502;
+    throw error;
+  }
+
+  // ── Step 3: Extract genre names from the `included` sideloaded data ───────
+  // Kitsu uses JSON:API — genres come in `json.included` as separate objects.
+  // We match them to the anime via the categories relationship.
+  const genreIds = new Set(
+    (json.data.relationships?.categories?.data ?? []).map((c) => c.id)
+  );
+  const genres = (json.included ?? [])
+    .filter((inc) => inc.type === "categories" && genreIds.has(inc.id))
+    .map((inc) => inc.attributes?.title ?? null)
+    .filter(Boolean);
+
+  // ── Step 4: Transform with genres ─────────────────────────────────────────
+  const transformed = transformKitsuAnime(json.data);
+  transformed.genres = genres; // override the empty array with real genres
+
+  // ── Step 5: Cache ─────────────────────────────────────────────────────────
+  await redisService.set(cacheKey, transformed, DETAIL_TTL);
+  console.log(`[kitsuAnimeService] Stored key: ${cacheKey} (TTL: ${DETAIL_TTL}s)`);
+
+  return { data: transformed, source: "api" };
+};
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                      getKitsuEpisodes                                       ║
+// ║  GET /api/anime/:id/episodes                                                ║
+// ║                                                                             ║
+// ║  Returns episode list for a Kitsu anime.                                   ║
+// ║  Kitsu paginates at 20 eps/page. Currently only page 1 is fetched.         ║
+// ║                                                                             ║
+// ║  TODO: ADD PAGINATION ─────────────────────────────────────────────────────║
+// ║  To load more episodes, accept a `page` param in the controller and        ║
+// ║  pass it here. The Kitsu offset pagination looks like:                     ║
+// ║    ?page[limit]=20&page[offset]=(page-1)*20                                ║
+// ║  Cache key per page: kitsu:episodes:{id}:page:{page}                      ║
+// ║                                                                             ║
+// ║  Cache key : kitsu:episodes:{id}   TTL: 6 hours                           ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+export const getKitsuEpisodes = async (id) => {
+  const cacheKey   = `kitsu:episodes:${id}`;
+  const EPISODE_TTL = 21600; // 6 hours
+
+  // ── Step 1: Check Redis ────────────────────────────────────────────────────
+  const cached = await redisService.get(cacheKey);
+  if (cached) {
+    console.log(`[kitsuAnimeService] Cache HIT  — getKitsuEpisodes (key: ${cacheKey})`);
+    return { data: cached.data, pagination: cached.pagination, source: "cache" };
+  }
+
+  // ── Step 2: Fetch page 1 from Kitsu ───────────────────────────────────────
+  console.log(`[kitsuAnimeService] Cache MISS — getKitsuEpisodes (key: ${cacheKey}) — fetching Kitsu API`);
+
+  const url = `${KITSU_BASE_URL}/anime/${id}/episodes?page[limit]=20&page[offset]=0&sort=number`;
+  const response = await fetch(url, {
+    headers: { Accept: "application/vnd.api+json" },
+  });
+
+  if (!response.ok) {
+    const error    = new Error(`Kitsu API returned status ${response.status}`);
+    error.status   = response.status === 404 ? 404 : 502;
+    throw error;
+  }
+
+  const json = await response.json();
+
+  // ── Step 3: Transform episodes ────────────────────────────────────────────
+  const episodes = (json.data ?? []).map((ep) => ({
+    id:        ep.id,
+    number:    ep.attributes?.number     ?? null,
+    title:     ep.attributes?.canonicalTitle ?? ep.attributes?.titles?.en ?? null,
+    synopsis:  ep.attributes?.synopsis   ?? null,
+    thumbnail: ep.attributes?.thumbnail?.original ?? null,
+    airdate:   ep.attributes?.airdate    ?? null,
+    duration:  ep.attributes?.length     ?? null, // minutes
+  }));
+
+  const pagination = {
+    // Kitsu uses meta.count — check if there are more results
+    hasNextPage:  (json.meta?.count ?? 0) > 20,
+    currentPage:  1,
+  };
+
+  // ── Step 4: Cache ─────────────────────────────────────────────────────────
+  await redisService.set(cacheKey, { data: episodes, pagination }, EPISODE_TTL);
+  console.log(`[kitsuAnimeService] Stored key: ${cacheKey} (TTL: ${EPISODE_TTL}s)`);
+
+  return { data: episodes, pagination, source: "api" };
+};

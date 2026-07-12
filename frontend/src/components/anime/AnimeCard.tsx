@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Star, Tv, Calendar } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import type { Anime } from "@/types/anime";
 import AnimeBadge from "./AnimeBadge";
 
@@ -17,10 +18,13 @@ interface AnimeCardProps {
 }
 
 export default function AnimeCard({ anime, onAddToPlaylist }: AnimeCardProps) {
+  // ── Detail page URL ─────────────────────────────────────────────────────────
+  // Uses anime.source ("jikan" | "kitsu") set by the backend transform.
+  // Route: /anime/jikan/:mal_id  or  /anime/kitsu/:kitsu_id
+  const detailHref = `/anime/${anime.source}/${anime.id}`;
+
   return (
-    <motion.div
-      className="group relative flex-shrink-0 w-[var(--card-width)] h-[var(--card-height)] cursor-pointer"
-    >
+    <Link href={detailHref} className="block group relative flex-shrink-0 w-[var(--card-width)] h-[var(--card-height)] cursor-pointer">
       <div className="card-base overflow-hidden card-hover h-full w-full relative transition-transform duration-[400ms] ease-[cubic-bezier(0.25,0.1,0.25,1)]">
         {/* ── Poster Background ───────────────────────────────────────────── */}
         {anime.image ? (
@@ -76,6 +80,6 @@ export default function AnimeCard({ anime, onAddToPlaylist }: AnimeCardProps) {
           )}
         </div>
       </div>
-    </motion.div>
+    </Link>
   );
 }
