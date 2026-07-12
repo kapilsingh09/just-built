@@ -3,6 +3,7 @@ import {
   getPopular,
   getAnimeById,
   getAnimeEpisodes,
+  getAnimeRelations,
 } from "../controllers/jikanAnimeController.js";
 
 const router = express.Router();
@@ -12,8 +13,9 @@ const router = express.Router();
 // Source:     MyAnimeList data via Jikan REST API
 // ──────────────────────────────────────────────────────────────────────────────
 
-router.get("/popular",           getPopular);       // GET /api/jikan/popular
-router.get("/:id",               getAnimeById);     // GET /api/jikan/:id
-router.get("/:id/episodes",      getAnimeEpisodes); // GET /api/jikan/:id/episodes
+router.get("/popular",           getPopular);        // GET /api/jikan/popular
+router.get("/:id",               getAnimeById);      // GET /api/jikan/:id
+router.get("/:id/episodes",      getAnimeEpisodes);  // GET /api/jikan/:id/episodes
+router.get("/:id/relations",     getAnimeRelations); // GET /api/jikan/:id/relations
 
 export default router;

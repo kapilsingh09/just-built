@@ -206,3 +206,69 @@ export const getJikanEpisodes = async (id) => {
 
   return { data: episodes, pagination, source: "api" };
 };
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                      getJikanRelations                                      ║
+// ║  GET /api/jikan/:id/relations                                               ║
+// ║                                                                             ║
+// ║  Returns related anime (Sequel, Prequel, Side Story, etc.) for an anime.    ║
+// ║  Used by the detail page to show "More from this Series" section.           ║
+// ║                                                                             ║
+// ║  Each item has: mal_id, title, type, relation ("Sequel", "Prequel", etc.)  ║
+// ║                                                                             ║
+// ║  Cache key : jikan:relations:{id}   TTL: 24 hours                          ║
+// ║  (Relations almost never change so a long TTL is safe)                     ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+export const getJikanRelations = async (id) => {
+  const cacheKey    = `jikan:relations:${id}`;
+  const RELATION_TTL = 86400; // 24 hours
+
+  // ── Step 1: Check Redis ────────────────────────────────────────────────────
+  const cached = await redisService.get(cacheKey);
+  if (cached) {
+    console.log(`[jikanAnimeService] Cache HIT  — getJikanRelations (key: ${cacheKey})`);
+    return { data: cached, source: "cache" };
+  }
+
+  // ── Step 2: Fetch from Jikan ───────────────────────────────────────────────
+  console.log(`[jikanAnimeService] Cache MISS — getJikanRelations (key: ${cacheKey}) — fetching Jikan API`);
+
+  const url      = `${JIKAN_BASE_URL}/anime/${id}/relations`;
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    // Relations might not exist for all anime — return empty rather than 502
+    if (response.status === 404) return { data: [], source: "api" };
+    const error    = new Error(`Jikan API returned status ${response.status}`);
+    error.status   = 502;
+    throw error;
+  }
+
+  const json = await response.json();
+
+  // ── Step 3: Flatten into a usable shape ───────────────────────────────────
+  // Jikan returns: [ { relation: "Sequel", entry: [{ mal_id, type, name, url }] } ]
+  // We flatten it to a single array with the relation type attached.
+  const KEEP_RELATIONS = new Set(["Sequel", "Prequel", "Side Story", "Parent Story", "Alternative Version"]);
+
+  const relations = [];
+  for (const group of json.data ?? []) {
+    if (!KEEP_RELATIONS.has(group.relation)) continue;
+    for (const entry of group.entry ?? []) {
+      if (entry.type !== "anime") continue; // skip manga relations
+      relations.push({
+        id:       entry.mal_id,
+        title:    entry.name,
+        relation: group.relation, // "Sequel" | "Prequel" | etc.
+        url:      entry.url,
+        source:   "jikan",
+      });
+    }
+  }
+
+  // ── Step 4: Cache ─────────────────────────────────────────────────────────
+  await redisService.set(cacheKey, relations, RELATION_TTL);
+  console.log(`[jikanAnimeService] Stored key: ${cacheKey} (TTL: ${RELATION_TTL}s)`);
+
+  return { data: relations, source: "api" };
+};

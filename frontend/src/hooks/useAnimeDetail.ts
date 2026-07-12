@@ -84,3 +84,50 @@ export function useAnimeEpisodes(source: "jikan" | "kitsu", id: string | number)
     error,
   };
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// useAnimeRelations
+//
+// Fetches related anime (Sequel, Prequel, Side Story, etc.) for an anime.
+// Uses the Jikan relations endpoint for Jikan-sourced anime.
+//
+// source = "jikan" → calls GET /api/jikan/:id/relations
+// source = "kitsu" → skipped (Kitsu doesn't expose relations the same way)
+//
+// Returns array of: { id, title, relation, url, source }
+//
+// NOTE: For Kitsu anime, this will return an empty array (graceful no-op).
+// TODO: Add Kitsu media-relationships support if needed later.
+// ─────────────────────────────────────────────────────────────────────────────
+interface RelatedAnime {
+  id:       number;
+  title:    string;
+  relation: string;
+  url:      string;
+  source:   "jikan";
+}
+
+interface RelationsApiResponse {
+  success: boolean;
+  source:  "cache" | "api";
+  data:    RelatedAnime[];
+}
+
+export function useAnimeRelations(source: "jikan" | "kitsu", id: string | number) {
+  const { data, isLoading, isError } = useQuery<RelationsApiResponse>({
+    queryKey: ["anime", "relations", source, id],
+    queryFn: async () => {
+      const res = await axiosInstance.get<RelationsApiResponse>(`/jikan/${id}/relations`);
+      return res.data;
+    },
+    // Only fetch for Jikan anime — skip for Kitsu
+    enabled: !!id && source === "jikan",
+    staleTime: 1000 * 60 * 60 * 24, // 24 hours — relations barely ever change
+  });
+
+  return {
+    relations: data?.data ?? [],
+    isLoading: source === "kitsu" ? false : isLoading,
+    isError,
+  };
+}

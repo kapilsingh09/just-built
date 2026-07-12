@@ -2,6 +2,7 @@ import {
   getPopularAnime,
   getJikanAnimeById,
   getJikanEpisodes,
+  getJikanRelations,
 } from "../services/jikanAnimeService.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -78,6 +79,31 @@ export const getAnimeEpisodes = async (req, res) => {
     });
   } catch (error) {
     console.error("[jikanAnimeController] getAnimeEpisodes:", error);
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/jikan/:id/relations
+//
+// Returns related anime (Sequel, Prequel, Side Story, etc.).
+// Used by the detail page to show "More from this Series".
+// ─────────────────────────────────────────────────────────────────────────────
+export const getAnimeRelations = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, source } = await getJikanRelations(id);
+
+    return res.status(200).json({
+      success: true,
+      source,
+      data,
+    });
+  } catch (error) {
+    console.error("[jikanAnimeController] getAnimeRelations:", error);
     return res.status(error.status || 500).json({
       success: false,
       message: error.message || "Internal Server Error",
