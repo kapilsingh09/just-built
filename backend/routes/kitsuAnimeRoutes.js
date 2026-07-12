@@ -3,6 +3,7 @@ import {
   getPopular,
   getTopRated,
   getLatest,
+  getSeasonalPopular,
 } from "../controllers/kitsuAnimeController.js";
 
 const router = express.Router();
@@ -12,8 +13,9 @@ const router = express.Router();
 // Source:     Kitsu API  (https://kitsu.io/api/edge)
 // ──────────────────────────────────────────────────────────────────────────────
 
-router.get("/popular",   getPopular);   // GET /api/anime/popular
-router.get("/top-rated", getTopRated);  // GET /api/anime/top-rated
-router.get("/latest",    getLatest);    // GET /api/anime/latest
+router.get("/popular",   getPopular);          // GET /api/anime/popular
+router.get("/top-rated", getTopRated);         // GET /api/anime/top-rated
+router.get("/latest",    getLatest);           // GET /api/anime/latest
+router.get("/seasonal",  getSeasonalPopular);  // GET /api/anime/seasonal
 
 export default router;

@@ -55,7 +55,7 @@ export default function AnimeSlider({
   return (
     <Container>
       {/* ── Header ───────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-3">
         <div>
           <h2 className="text-2xl md:text-3xl font-bold text-white">
             {title}
@@ -89,17 +89,14 @@ export default function AnimeSlider({
 
       {/* ── Scroll Container with Floating Navigation ─────────────────────── */}
       <div className="relative group/slider">
-        {/* Left Floating Button */}
         <button
           onClick={() => scroll("left")}
-          className={`absolute -left-4 sm:-left-6 top-1/2 -translate-y-1/2 z-20 group/left-btn
-                     w-12 h-12 rounded-full bg-black/40 backdrop-blur-md
-                     border border-white/10 text-white shadow-[0_8px_24px_rgba(0,0,0,0.3)]
-                     flex items-center justify-center transition-all duration-300 cursor-pointer
-                     hover:bg-white/20 hover:border-accent hover:text-accent 
-                     hover:shadow-[0_8px_24px_rgba(245,158,11,0.2)] active:scale-90
+          className={`absolute -left-2 sm:-left-4 top-1/2 -translate-y-1/2 z-20 group/left-btn
+                     w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20
+                     flex items-center justify-center text-white shadow-lg
+                     hover:bg-white/25 transition-all duration-300 cursor-pointer active:scale-95
                      ${canScrollLeft
-              ? "opacity-100 scale-100 pointer-events-auto"
+              ? "opacity-100 hover:scale-105 pointer-events-auto"
               : "opacity-0 scale-90 pointer-events-none"
             }`}
           aria-label="Scroll left"
@@ -110,7 +107,7 @@ export default function AnimeSlider({
         <div
           ref={scrollRef}
           onScroll={checkScroll}
-          className="flex gap-4 overflow-x-auto hide-scrollbar scroll-smooth pb-4 px-1"
+          className="flex gap-3 overflow-x-auto hide-scrollbar scroll-smooth pb-2 px-1"
           style={{ scrollSnapType: "x mandatory" }}
         >
           {data.map((anime) => (
@@ -123,17 +120,14 @@ export default function AnimeSlider({
           ))}
         </div>
 
-        {/* Right Floating Button */}
         <button
           onClick={() => scroll("right")}
-          className={`absolute right-0 sm:-right-6 top-1/2 -translate-y-1/2 z-20 group/right-btn
-                     w-12 h-12 rounded-full bg-black/40 backdrop-blur-md
-                     border border-white/10 text-white shadow-[0_8px_24px_rgba(0,0,0,0.3)]
-                     flex items-center justify-center transition-all duration-300 cursor-pointer
-                     hover:bg-white/20 hover:border-accent hover:text-accent 
-                     hover:shadow-[0_8px_24px_rgba(245,158,11,0.2)] active:scale-90
+          className={`absolute right-0 sm:-right-4 top-1/2 -translate-y-1/2 z-20 group/right-btn
+                     w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20
+                     flex items-center justify-center text-white shadow-lg
+                     hover:bg-white/25 transition-all duration-300 cursor-pointer active:scale-95
                      ${canScrollRight
-              ? "opacity-100 scale-100 pointer-events-auto"
+              ? "opacity-100 hover:scale-105 pointer-events-auto"
               : "opacity-0 scale-90 pointer-events-none"
             }`}
           aria-label="Scroll right"

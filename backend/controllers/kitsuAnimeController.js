@@ -2,6 +2,7 @@ import {
   getKitsuPopular,
   getKitsuTopRated,
   getKitsuLatest,
+  getKitsuSeasonalPopular,
 } from "../services/kitsuAnimeService.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -69,6 +70,32 @@ export const getLatest = async (req, res) => {
     });
   } catch (error) {
     console.error("[kitsuAnimeController] getLatest:", error);
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/anime/seasonal
+//
+// Returns the most fan-popular anime currently airing this season.
+// Served via Redis cache (key: anime:seasonal:<year>:<season>, TTL: 21600s).
+// ─────────────────────────────────────────────────────────────────────────────
+export const getSeasonalPopular = async (req, res) => {
+  try {
+    const { data, source, season, year } = await getKitsuSeasonalPopular();
+
+    return res.status(200).json({
+      success: true,
+      source,
+      season,
+      year,
+      data,
+    });
+  } catch (error) {
+    console.error("[kitsuAnimeController] getSeasonalPopular:", error);
     return res.status(error.status || 500).json({
       success: false,
       message: error.message || "Internal Server Error",

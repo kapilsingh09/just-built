@@ -19,12 +19,27 @@ const ANIME_CACHE_TTL = parseInt(process.env.ANIME_CACHE_TTL, 10) || 3600; // 1 
 const transformKitsuAnime = (anime) => {
   const attrs = anime.attributes;
 
+  // Kitsu posterImage sizes (portrait): tiny < small < medium < large < original
+  // Kitsu coverImage  sizes (landscape): tiny < small < large < original
+  // We always prefer the biggest available for best display quality.
+  const posterImage =
+    attrs.posterImage?.original ??
+    attrs.posterImage?.large    ??
+    attrs.posterImage?.medium   ??
+    null;
+
+  const coverImage =
+    attrs.coverImage?.original ??
+    attrs.coverImage?.large    ??
+    attrs.coverImage?.small    ??
+    null;
+
   return {
     id:          anime.id,
     title:       attrs.canonicalTitle                           ?? null,
     synopsis:    attrs.synopsis                                 ?? null,
-    image:       attrs.posterImage?.large                       ?? null,
-    bannerImage: attrs.coverImage?.original                     ?? null,
+    image:       posterImage,                  // high-res portrait poster
+    bannerImage: coverImage ?? posterImage,    // landscape cover; fall back to poster
     score:       attrs.averageRating
                    ? Math.round(parseFloat(attrs.averageRating) / 10 * 10) / 10
                    : null,
@@ -139,4 +154,113 @@ export const getKitsuLatest = async () => {
   const kitsuUrl = `${KITSU_BASE_URL}/anime?page[limit]=20&sort=-startDate`;
 
   return fetchKitsuWithCache(cacheKey, kitsuUrl, "getKitsuLatest");
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// getKitsuSeasonalPopular
+// GET /api/anime/seasonal
+//
+// Returns popular anime airing in the current season (quarter) of the current
+// year, sorted by -userCount so the most fan-followed shows come first.
+//
+// Season mapping (by month):
+//   Jan–Mar  → Winter
+//   Apr–Jun  → Spring
+//   Jul–Sep  → Summer
+//   Oct–Dec  → Fall
+//
+// Strategy:
+//   Kitsu doesn't expose a season filter natively, so we:
+//   1. Filter by status = "current" (currently airing)
+//   2. Filter startDate to be within the current year
+//   3. Sort by -userCount for fan popularity
+//   4. Fetch 30 results and post-filter to the current season window client-side
+//      (inside the service) so we always return 10–20 clean results.
+//
+// Cache key: anime:seasonal:<year>:<season>  (e.g. anime:seasonal:2025:summer)
+// Cache TTL: 6 hours (21600s) — seasonal data changes slowly
+// ─────────────────────────────────────────────────────────────────────────────
+export const getKitsuSeasonalPopular = async () => {
+  const now        = new Date();
+  const year       = now.getFullYear();
+  const month      = now.getMonth() + 1; // 1-indexed
+
+  // Determine current season label and date window
+  let season, seasonStart, seasonEnd;
+  if (month <= 3) {
+    season      = "winter";
+    seasonStart = `${year}-01-01`;
+    seasonEnd   = `${year}-03-31`;
+  } else if (month <= 6) {
+    season      = "spring";
+    seasonStart = `${year}-04-01`;
+    seasonEnd   = `${year}-06-30`;
+  } else if (month <= 9) {
+    season      = "summer";
+    seasonStart = `${year}-07-01`;
+    seasonEnd   = `${year}-09-30`;
+  } else {
+    season      = "fall";
+    seasonStart = `${year}-10-01`;
+    seasonEnd   = `${year}-12-31`;
+  }
+
+  const cacheKey = `anime:seasonal:${year}:${season}`;
+  const SEASONAL_TTL = 21600; // 6 hours
+
+  // ── Step 1: Check Redis cache ──────────────────────────────────────────────
+  const cached = await redisService.get(cacheKey);
+  if (cached) {
+    console.log(`[kitsuAnimeService] Cache HIT  — getKitsuSeasonalPopular (key: ${cacheKey})`);
+    return { data: cached, source: "cache", season, year };
+  }
+
+  // ── Step 2: Fetch from Kitsu — currently airing, sorted by popularity ─────
+  console.log(`[kitsuAnimeService] Cache MISS — getKitsuSeasonalPopular (key: ${cacheKey}) — fetching Kitsu API`);
+
+  // Filter: status=current (airing now), startDate in this year, sort by fans
+  // Note: Kitsu API max limit is 20. Do not increase page[limit] above 20 or it throws a 400 Error.
+  const kitsuUrl = `${KITSU_BASE_URL}/anime?filter[status]=current&filter[seasonYear]=${year}&page[limit]=20&sort=-userCount`;
+
+  const response = await fetch(kitsuUrl, {
+    headers: { Accept: "application/vnd.api+json" },
+  });
+
+  if (!response.ok) {
+    const error  = new Error(`Kitsu API returned status ${response.status}`);
+    error.status = 502;
+    throw error;
+  }
+
+  const json = await response.json();
+
+  if (!Array.isArray(json.data)) {
+    const error  = new Error("Unexpected response shape from Kitsu API");
+    error.status = 502;
+    throw error;
+  }
+
+  // ── Step 3: Post-filter to current season window & transform ──────────────
+  const startMs = new Date(seasonStart).getTime();
+  const endMs   = new Date(seasonEnd).getTime();
+
+  const transformed = json.data
+    .filter((anime) => {
+      const startDate = anime.attributes?.startDate;
+      if (!startDate) return true; // keep if no date (currently airing)
+      const ms = new Date(startDate).getTime();
+      return ms >= startMs && ms <= endMs;
+    })
+    .map(transformKitsuAnime);
+
+  // If season filter is too strict and returns nothing, fall back to all current
+  const finalData = transformed.length > 0
+    ? transformed
+    : json.data.map(transformKitsuAnime);
+
+  // ── Step 4: Store in Redis ─────────────────────────────────────────────────
+  await redisService.set(cacheKey, finalData, SEASONAL_TTL);
+  console.log(`[kitsuAnimeService] Stored key: ${cacheKey} (TTL: ${SEASONAL_TTL}s)`);
+
+  return { data: finalData, source: "api", season, year };
 };

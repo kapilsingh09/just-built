@@ -19,55 +19,52 @@ interface AnimeCardProps {
 export default function AnimeCard({ anime, onAddToPlaylist }: AnimeCardProps) {
   return (
     <motion.div
-      className="group relative flex-shrink-0 w-[240px] sm:w-[260px] lg:w-[270px] cursor-pointer"
-      whileHover={{ y: -6 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      className="group relative flex-shrink-0 w-[var(--card-width)] h-[var(--card-height)] cursor-pointer"
     >
-      <div className="card-base overflow-hidden hover-glow">
+      <div className="card-base overflow-hidden card-hover h-full w-full relative transition-transform duration-[400ms] ease-[cubic-bezier(0.25,0.1,0.25,1)]">
+        {/* ── Poster Background ───────────────────────────────────────────── */}
+        {anime.image ? (
+          <Image
+            src={anime.image}
+            alt={anime.title ?? "Anime"}
+            fill
+            sizes="(max-width: 640px) 240px, (max-width: 1024px) 260px, 270px"
+            className="object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-surface">
+            <Tv className="w-12 h-12 text-border" />
+          </div>
+        )}
 
-        {/* ── Poster ──────────────────────────────────────────────────────── */}
-        <div className="relative aspect-[3/4] overflow-hidden bg-surface">
-          {anime.image ? (
-            <Image
-              src={anime.image}
-              alt={anime.title ?? "Anime"}
-              fill
-              sizes="(max-width: 640px) 240px, (max-width: 1024px) 260px, 270px"
-              className="object-cover transition-transform duration-700 group-hover:scale-110"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-surface">
-              <Tv className="w-12 h-12 text-border" />
-            </div>
-          )}
+        {/* Gradient overlay for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-          {/* Gradient on hover */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        {/* ── Top section: Score and Type (Glass Effect) ─────────────────── */}
+        {anime.score != null && (
+          <div className="absolute top-3 left-3 bg-white/20 backdrop-blur-md text-white border border-white/20 shadow-sm rounded-full px-2.5 py-1 text-xs font-medium flex items-center gap-1 z-10">
+            <Star className="w-3 h-3 text-yellow-400" fill="currentColor" />
+            {anime.score.toFixed(1)}
+          </div>
+        )}
 
-          {/* Score — top left */}
-          {anime.score != null && (
-            <div className="absolute top-3 left-3 badge-base badge-rating">
-              <Star className="w-3 h-3" fill="currentColor" />
-              {anime.score.toFixed(1)}
-            </div>
-          )}
+        {anime.type && (
+          <div className="absolute top-3 right-3 bg-white/20 backdrop-blur-md text-white border border-white/20 shadow-sm rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide z-10">
+            {anime.type}
+          </div>
+        )}
 
-          {/* Type — top right */}
-          {anime.type && (
-            <div className="absolute top-3 right-3 badge-base badge-type text-[10px]">
-              {anime.type}
-            </div>
-          )}
+        {/* ── Bottom Overlay: Title & Add Button ─────────────────────────── */}
+        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-16 pb-3 px-3 flex items-end justify-between z-10 transform translate-y-0 transition-transform duration-300">
+          <h3 className="font-semibold text-sm text-white line-clamp-2 pr-2">
+            {anime.title ?? "Untitled"}
+          </h3>
 
-          {/* Add to playlist — bottom right on hover */}
           {onAddToPlaylist && (
             <button
               onClick={(e) => { e.stopPropagation(); onAddToPlaylist(anime); }}
-              className="absolute bottom-3 right-3 w-9 h-9 rounded-xl bg-white/90 backdrop-blur-sm
-                         flex items-center justify-center text-primary
-                         opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0
-                         transition-all duration-300 hover:bg-accent hover:text-white
-                         shadow-md cursor-pointer"
+              className="flex-shrink-0 w-8 h-8 rounded-full bg-white text-black
+                         flex items-center justify-center transition-transform hover:scale-110 shadow-md cursor-pointer"
               aria-label="Add to playlist"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -76,42 +73,6 @@ export default function AnimeCard({ anime, onAddToPlaylist }: AnimeCardProps) {
                 <path d="M12 5v14M5 12h14" />
               </svg>
             </button>
-          )}
-        </div>
-
-        {/* ── Info ─────────────────────────────────────────────────────────── */}
-        <div className="p-3.5">
-          <h3 className="font-semibold text-sm text-primary line-clamp-1 mb-1.5">
-            {anime.title ?? "Untitled"}
-          </h3>
-
-          <div className="flex items-center gap-3 text-secondary text-xs">
-            {anime.year && (
-              <span className="flex items-center gap-1">
-                <Calendar className="w-3 h-3" /> {anime.year}
-              </span>
-            )}
-            {anime.episodes && (
-              <span className="flex items-center gap-1">
-                <Tv className="w-3 h-3" /> {anime.episodes} eps
-              </span>
-            )}
-          </div>
-
-          {/* Genres (Jikan) */}
-          {anime.genres.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-2">
-              {anime.genres.slice(0, 2).map((g) => (
-                <AnimeBadge key={g} label={g} variant="genre" />
-              ))}
-            </div>
-          )}
-
-          {/* Rating badge fallback (Kitsu — no genres) */}
-          {anime.genres.length === 0 && anime.rating && (
-            <div className="mt-2">
-              <AnimeBadge label={anime.rating} variant="rating" />
-            </div>
           )}
         </div>
       </div>

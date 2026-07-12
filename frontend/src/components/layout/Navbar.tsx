@@ -15,6 +15,7 @@ export default function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const navRef = useRef<HTMLElement>(null);
 
   /* Focus the input when overlay opens */
   useEffect(() => {
@@ -40,11 +41,22 @@ export default function Navbar() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  /* Lock body scroll when search overlay is open */
+  /* Lock body scroll — compensate scrollbar width on BOTH body and fixed navbar */
   useEffect(() => {
-    document.body.style.overflow = searchOpen ? "hidden" : "";
+    if (searchOpen) {
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      document.body.style.overflow = "hidden";
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+      if (navRef.current) navRef.current.style.paddingRight = `${scrollbarWidth}px`;
+    } else {
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+      if (navRef.current) navRef.current.style.paddingRight = "";
+    }
     return () => {
       document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+      if (navRef.current) navRef.current.style.paddingRight = "";
     };
   }, [searchOpen]);
 
@@ -55,7 +67,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#111111]/90 backdrop-blur-xl border-b border-white/10">
+      <nav ref={navRef} className="fixed top-0 left-0 right-0 z-50 bg-[#111111]/90 backdrop-blur-xl border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex h-16 items-center justify-between">
 
@@ -267,25 +279,20 @@ export default function Navbar() {
       <div className="h-16" />
 
       {/* ── Search Overlay ─────────────────────────────────────────────── */}
-      {/* Backdrop + blur */}
+      {/* 
+        FIX: backdrop-filter is always present (GPU layer stays alive).
+        We only toggle opacity + pointer-events so there's no reflow/repaint.
+      */}
       <div
         onClick={closeSearch}
-        className="fixed inset-0 z-[100] transition-all duration-300 ease-in-out"
-        style={{
-          backgroundColor: searchOpen ? "rgba(0, 0, 0, 0.70)" : "rgba(0, 0, 0, 0)",
-          backdropFilter: searchOpen ? "blur(12px)" : "blur(0px)",
-          WebkitBackdropFilter: searchOpen ? "blur(12px)" : "blur(0px)",
-          pointerEvents: searchOpen ? "auto" : "none",
-        }}
+        className={`fixed inset-0 z-[100] bg-black/70 backdrop-blur-md transition-opacity duration-300 ease-in-out
+          ${searchOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
       >
         {/* Search Container — centred, clicks don't propagate */}
         <div
           onClick={(e) => e.stopPropagation()}
-          className="absolute top-0 left-0 right-0 flex justify-center transition-all duration-300 ease-out"
-          style={{
-            transform: searchOpen ? "translateY(0)" : "translateY(-30px)",
-            opacity: searchOpen ? 1 : 0,
-          }}
+          className={`absolute top-0 left-0 right-0 flex justify-center transition-all duration-300 ease-out
+            ${searchOpen ? "translate-y-0 opacity-100" : "-translate-y-6 opacity-0"}`}
         >
           <div className="w-full max-w-2xl mx-4 mt-24 sm:mt-32">
             {/* Search Input */}

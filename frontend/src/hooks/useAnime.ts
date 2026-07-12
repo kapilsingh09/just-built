@@ -101,3 +101,28 @@ export function useKitsuLatest() {
     error,
   };
 }
+
+// ── useKitsuSeasonal ──────────────────────────────────────────────────────────
+// Route:  GET /api/anime/seasonal
+// Source: Kitsu API — currently airing this season, sorted by fan popularity
+// ─────────────────────────────────────────────────────────────────────────────
+export function useKitsuSeasonal() {
+  const { data, isLoading, isError, error } = useQuery<AnimeApiResponse & { season?: string; year?: number }>({
+    queryKey: ["kitsu", "seasonal"],
+    queryFn: async () => {
+      const res = await axiosInstance.get<AnimeApiResponse & { season?: string; year?: number }>("/anime/seasonal");
+      return res.data;
+    },
+  });
+
+  return {
+    data:      data?.data ?? [] as Anime[],
+    source:    data?.source ?? null,
+    season:    data?.season ?? null,
+    year:      data?.year ?? null,
+    route:     "GET /api/anime/seasonal",
+    isLoading,
+    isError,
+    error,
+  };
+}

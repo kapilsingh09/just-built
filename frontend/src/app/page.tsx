@@ -6,6 +6,7 @@ import {
   useKitsuPopular,
   useKitsuTopRated,
   useKitsuLatest,
+  useKitsuSeasonal,
 } from "@/hooks/useAnime";
 import type { Anime } from "@/types/anime";
 import HeroSlider from "@/components/hero/HeroSlider";
@@ -23,10 +24,11 @@ import { AlertCircle } from "lucide-react";
 
 export default function Home() {
   // ── Data hooks — one per backend route ────────────────────────────────────
-  const jikanPopular = useJikanPopular();   // GET /api/jikan/popular
-  const kitsuPopular = useKitsuPopular();   // GET /api/anime/popular
-  const kitsuTopRated = useKitsuTopRated();  // GET /api/anime/top-rated
-  const kitsuLatest = useKitsuLatest();    // GET /api/anime/latest
+  const jikanPopular  = useJikanPopular();    // GET /api/jikan/popular
+  const kitsuPopular  = useKitsuPopular();    // GET /api/anime/popular
+  const kitsuTopRated = useKitsuTopRated();   // GET /api/anime/top-rated
+  const kitsuLatest   = useKitsuLatest();     // GET /api/anime/latest
+  const kitsuSeasonal = useKitsuSeasonal();   // GET /api/anime/seasonal
 
   // ── Playlist modal ────────────────────────────────────────────────────────
   const [playlistAnime, setPlaylistAnime] = useState<Anime | null>(null);
@@ -37,11 +39,13 @@ export default function Home() {
     setPlaylistOpen(true);
   };
 
-  // Hero uses Kitsu popular — best poster/banner images
-  const heroAnime = kitsuPopular.data.slice(0, 5);
+  // Hero uses seasonal popular — anime airing this season, sorted by fans
+  const heroAnime = kitsuSeasonal.data.length > 0
+    ? kitsuSeasonal.data
+    : kitsuPopular.data; // fallback if seasonal is empty
 
   // ── Global loading — wait for the two most important sections ─────────────
-  const coreLoading = jikanPopular.isLoading || kitsuPopular.isLoading;
+  const coreLoading = jikanPopular.isLoading || kitsuPopular.isLoading || kitsuSeasonal.isLoading;
   const anyError = jikanPopular.isError || kitsuPopular.isError;
   const firstError = jikanPopular.error || kitsuPopular.error;
 
@@ -87,7 +91,7 @@ export default function Home() {
       {/* ── Trending on MAL ───────────────────────────────────────────────
           Route:  GET /api/jikan/popular
           Source: Jikan API (MyAnimeList) — airing anime ranked by score  */}
-      <Section>
+      <Section className="bg-zinc-900 !py-6 md:!py-8">
         <AnimeSlider
           title="🔥 Trending on MAL"
           subtitle={jikanPopular.route}
@@ -100,7 +104,7 @@ export default function Home() {
       {/* ── Popular on Kitsu ──────────────────────────────────────────────
           Route:  GET /api/anime/popular
           Source: Kitsu API — sorted by -userCount (most followed)        */}
-      <Section className="bg-surface">
+      <Section className="bg-zinc-900 !py-6 md:!py-8">
         <AnimeSlider
           title="⭐ Popular on Kitsu"
           subtitle={kitsuPopular.route}
@@ -113,7 +117,7 @@ export default function Home() {
       {/* ── Top Rated ─────────────────────────────────────────────────────
           Route:  GET /api/anime/top-rated
           Source: Kitsu API — sorted by -averageRating                    */}
-      <Section>
+      <Section className="bg-zinc-900 !py-6 md:!py-8">
         <AnimeSlider
           title="🏆 Top Rated"
           subtitle={kitsuTopRated.route}
@@ -126,7 +130,7 @@ export default function Home() {
       {/* ── Latest Releases ───────────────────────────────────────────────
           Route:  GET /api/anime/latest
           Source: Kitsu API — sorted by -startDate                        */}
-      <Section className="bg-surface">
+      <Section className="bg-zinc-900 !py-6 md:!py-8">
         <AnimeSlider
           title="📺 Latest Releases"
           subtitle={kitsuLatest.route}

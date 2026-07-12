@@ -10,6 +10,11 @@
   --surface: #27272a;
   --card: #27272a;
 
+  /* ── Card Dimensions ──────────────────────────────────────────────────────── */
+  --card-width: 270px;
+  --card-height: 400px;
+  --card-radius: 1.5rem;
+
   /* ── Text ─────────────────────────────────────────────────────────────────── */
   --primary: #ffffff;
   --secondary: #a1a1aa;
@@ -38,9 +43,10 @@
   --radius-full: 9999px;
 
   /* ── Transitions ─────────────────────────────────────────────────────────── */
-  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 300ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  --transition-base: 400ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  --transition-slow: 600ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  --transition-apple: 400ms cubic-bezier(0.25, 0.1, 0.25, 1);
 
   /* ── Typography ──────────────────────────────────────────────────────────── */
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
@@ -165,16 +171,18 @@ body {
 .card-base {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: var(--radius-2xl);
+  border-radius: var(--card-radius);
+  width: var(--card-width);
+  height: var(--card-height);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
   transition: all var(--transition-base);
 }
 
 .card-hover:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-4px);
-  border-color: transparent;
+  box-shadow: var(--shadow-xl);
+  transform: scale(1.02) translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════

@@ -85,14 +85,29 @@ export default function HeroSlider({ anime, onAddToPlaylist }: HeroSliderProps) 
         >
           {/* Banner Image */}
           {(currentAnime.bannerImage || currentAnime.image) && (
-            <Image
-              src={(currentAnime.bannerImage || currentAnime.image) as string}
-              alt={currentAnime.title || "Anime"}
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover "
-            />
+            <>
+              {/* Blurred background fill — makes portrait posters look full-screen */}
+              <Image
+                src={(currentAnime.bannerImage || currentAnime.image) as string}
+                alt=""
+                fill
+                priority
+                quality={60}
+                sizes="100vw"
+                className="object-cover object-center scale-110 blur-xl opacity-60"
+                aria-hidden
+              />
+              {/* Sharp main image on top */}
+              <Image
+                src={(currentAnime.bannerImage || currentAnime.image) as string}
+                alt={currentAnime.title || "Anime"}
+                fill
+                priority
+                quality={100}
+                sizes="100vw"
+                className="object-cover object-center"
+              />
+            </>
           )}
 
           {/* Overlays */}
@@ -189,6 +204,9 @@ export default function HeroSlider({ anime, onAddToPlaylist }: HeroSliderProps) 
                 )}
 
                 {/* CTA Buttons */}
+              </div>
+            </motion.div>
+          </AnimatePresence>
                 <div className="flex items-center gap-3">
                   <Button
                     variant="secondary"
@@ -205,9 +223,6 @@ export default function HeroSlider({ anime, onAddToPlaylist }: HeroSliderProps) 
                     Add To List
                   </Button>
                 </div>
-              </div>
-            </motion.div>
-          </AnimatePresence>
         </div>
       </div>
 
@@ -215,7 +230,7 @@ export default function HeroSlider({ anime, onAddToPlaylist }: HeroSliderProps) 
       <div className=" absolute flex flex-col bottom-20 right-8 z-20 items-center gap-3">
         <button
           onClick={prev}
-          className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md border border-white/20
+          className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20
                      flex items-center justify-center text-white shadow-lg
                      hover:bg-white/25 hover:scale-105 transition-all duration-300 cursor-pointer active:scale-95"
           aria-label="Previous slide"
@@ -224,7 +239,7 @@ export default function HeroSlider({ anime, onAddToPlaylist }: HeroSliderProps) 
         </button>
         <button
           onClick={next}
-          className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md border border-white/20
+          className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20
                      flex items-center justify-center text-white shadow-lg
                      hover:bg-white/25 hover:scale-105 transition-all duration-300 cursor-pointer active:scale-95"
           aria-label="Next slide"
