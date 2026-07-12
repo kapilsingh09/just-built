@@ -19,6 +19,7 @@ const getCurrentSeason = () => {
 // ─────────────────────────────────────────────────────────────────────────────
 const transformJikanAnime = (data) => ({
   id:          data.mal_id,
+  source:      "jikan",           // ← used by AnimeCard to build the detail page URL
   title:       data.title,
   synopsis:    data.synopsis,
   score:       data.score,
@@ -31,7 +32,11 @@ const transformJikanAnime = (data) => ({
   type:        data.type,
   rating:      data.rating,
   genres:      data.genres?.map((g) => g.name)   ?? [],
+  trailerUrl:  data.trailer?.embed_url           ?? null,
+  duration:    data.duration                     ?? null,
+  studios:     data.studios?.map((s) => s.name)  ?? [],
 });
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // getPopularAnime
@@ -91,4 +96,113 @@ export const getPopularAnime = async () => {
   console.log(`[jikanAnimeService] Stored key: ${cacheKey} (TTL: ${ANIME_CACHE_TTL}s)`);
 
   return { data: transformed, source: "api", year, season };
+};
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                      getJikanAnimeById                                      ║
+// ║  GET /api/jikan/:id                                                         ║
+// ║                                                                             ║
+// ║  Returns FULL detail for a single Jikan/MAL anime by its mal_id.            ║
+// ║  Includes: synopsis, genres, studios, trailer, duration, rating.            ║
+// ║                                                                             ║
+// ║  Cache key : jikan:detail:{id}   TTL: 1 hour                               ║
+// ║  Rate limit: Jikan allows ~3 req/sec — Redis absorbs repeated visits.       ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+export const getJikanAnimeById = async (id) => {
+  const cacheKey = `jikan:detail:${id}`;
+
+  // ── Step 1: Check Redis ────────────────────────────────────────────────────
+  const cached = await redisService.get(cacheKey);
+  if (cached) {
+    console.log(`[jikanAnimeService] Cache HIT  — getJikanAnimeById (key: ${cacheKey})`);
+    return { data: cached, source: "cache" };
+  }
+
+  // ── Step 2: Fetch from Jikan API ──────────────────────────────────────────
+  console.log(`[jikanAnimeService] Cache MISS — getJikanAnimeById (key: ${cacheKey}) — fetching Jikan API`);
+
+  const url      = `${JIKAN_BASE_URL}/anime/${id}/full`; // /full includes all relationships
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    const error    = new Error(`Jikan API returned status ${response.status}`);
+    error.status   = response.status === 404 ? 404 : 502;
+    throw error;
+  }
+
+  const json = await response.json();
+
+  if (!json.data) {
+    const error  = new Error("Unexpected response shape from Jikan API");
+    error.status = 502;
+    throw error;
+  }
+
+  // ── Step 3: Transform + cache ─────────────────────────────────────────────
+  const transformed = transformJikanAnime(json.data);
+  await redisService.set(cacheKey, transformed, ANIME_CACHE_TTL);
+  console.log(`[jikanAnimeService] Stored key: ${cacheKey} (TTL: ${ANIME_CACHE_TTL}s)`);
+
+  return { data: transformed, source: "api" };
+};
+
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║                      getJikanEpisodes                                       ║
+// ║  GET /api/jikan/:id/episodes                                                ║
+// ║                                                                             ║
+// ║  Returns episode list for a Jikan/MAL anime.                               ║
+// ║  Jikan paginates at 100 eps/page. Currently only page 1 is fetched.        ║
+// ║                                                                             ║
+// ║  TODO: ADD PAGINATION ─────────────────────────────────────────────────────║
+// ║  To load more episodes, accept a `page` param here and in the controller.  ║
+// ║  Cache key would be: jikan:episodes:{id}:page:{page}                       ║
+// ║                                                                             ║
+// ║  Cache key : jikan:episodes:{id}   TTL: 6 hours                           ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+export const getJikanEpisodes = async (id) => {
+  const cacheKey = `jikan:episodes:${id}`;
+  const EPISODE_TTL = 21600; // 6 hours — episodes rarely change
+
+  // ── Step 1: Check Redis ────────────────────────────────────────────────────
+  const cached = await redisService.get(cacheKey);
+  if (cached) {
+    console.log(`[jikanAnimeService] Cache HIT  — getJikanEpisodes (key: ${cacheKey})`);
+    return { data: cached.data, pagination: cached.pagination, source: "cache" };
+  }
+
+  // ── Step 2: Fetch page 1 from Jikan ───────────────────────────────────────
+  console.log(`[jikanAnimeService] Cache MISS — getJikanEpisodes (key: ${cacheKey}) — fetching Jikan API`);
+
+  const url      = `${JIKAN_BASE_URL}/anime/${id}/episodes?page=1`;
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    const error    = new Error(`Jikan API returned status ${response.status}`);
+    error.status   = response.status === 404 ? 404 : 502;
+    throw error;
+  }
+
+  const json = await response.json();
+
+  // ── Step 3: Transform episodes into our shape ─────────────────────────────
+  const episodes = (json.data ?? []).map((ep) => ({
+    id:        ep.mal_id,
+    number:    ep.mal_id,
+    title:     ep.title     ?? ep.title_romanji ?? null,
+    synopsis:  null,           // Jikan episodes list doesn't include synopsis
+    thumbnail: null,           // Jikan episodes list doesn't include thumbnails
+    airdate:   ep.aired      ?? null,
+    duration:  null,           // not provided in episode list endpoint
+  }));
+
+  const pagination = {
+    hasNextPage:  json.pagination?.has_next_page ?? false,
+    currentPage:  json.pagination?.current_page  ?? 1,
+  };
+
+  // ── Step 4: Cache ─────────────────────────────────────────────────────────
+  await redisService.set(cacheKey, { data: episodes, pagination }, EPISODE_TTL);
+  console.log(`[jikanAnimeService] Stored key: ${cacheKey} (TTL: ${EPISODE_TTL}s)`);
+
+  return { data: episodes, pagination, source: "api" };
 };

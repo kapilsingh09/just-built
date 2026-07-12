@@ -34,8 +34,19 @@ const transformKitsuAnime = (anime) => {
     attrs.coverImage?.small    ??
     null;
 
+  // ── Extract genres from included relationships (if present) ────────────────
+  // When `?include=categories` is passed to Kitsu, genres live in anime.relationships
+  // NOTE: For list endpoints, genres are NOT included (empty array is fine).
+  //       The detail endpoint fetches with ?include=categories to fill this.
+  const genres = [];
+  if (Array.isArray(anime.relationships?.categories?.data)) {
+    // IDs only — the actual names come from the `included` array in the response
+    // This is handled in getKitsuAnimeById, not here
+  }
+
   return {
     id:          anime.id,
+    source:      "kitsu",         // ← used by AnimeCard to build the detail page URL
     title:       attrs.canonicalTitle                           ?? null,
     synopsis:    attrs.synopsis                                 ?? null,
     image:       posterImage,                  // high-res portrait poster
@@ -48,10 +59,15 @@ const transformKitsuAnime = (anime) => {
     year:        attrs.startDate
                    ? new Date(attrs.startDate).getFullYear()
                    : null,
-    season:      null,               // Kitsu does not expose a season label
+    season:      attrs.season                                   ?? null,
     type:        attrs.subtype       ?? null,  // "TV" | "movie" | "OVA" | etc.
     rating:      attrs.ageRatingGuide ?? attrs.ageRating ?? null,
-    genres:      [],                 // Genre names require a separate Kitsu include
+    genres:      genres,           // filled by getKitsuAnimeById on detail page
+    trailerUrl:  attrs.youtubeVideoId
+                   ? `https://www.youtube.com/embed/${attrs.youtubeVideoId}`
+                   : null,
+    duration:    attrs.episodeLength ? `${attrs.episodeLength} min per ep` : null,
+    studios:     [],               // TODO: Kitsu studios need a separate relationship fetch
   };
 };
 
