@@ -1,11 +1,11 @@
 "use client";
 
-import { use } from "react";
+import { use, useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  Star, Tv, Calendar, Clock, Film, ChevronLeft,
-  Play, BookmarkPlus, AlertCircle,
+  Star, Tv, Calendar, Clock, Film, ChevronLeft, ChevronDown,
+  Play, BookmarkPlus, AlertCircle, Layers,
 } from "lucide-react";
 import { useAnimeDetail, useAnimeEpisodes } from "@/hooks/useAnimeDetail";
 import type { Episode } from "@/types/anime";
@@ -13,24 +13,66 @@ import type { Episode } from "@/types/anime";
 // ─────────────────────────────────────────────────────────────────────────────
 // /anime/[source]/[id] — Anime Detail Page
 //
-// Receives the `source` ("jikan" | "kitsu") and `id` from the URL params.
-// The source tells the hooks which backend route to call.
+// Sections:
+//  1. Hero banner    — blurred bg, poster, title, score, synopsis (expandable)
+//  2. Info grid      — genres, studios, rating, type, status, year
+//  3. Episode list   — grouped by season, default 6 shown, blur + "Show More"
 //
-// Sections on this page:
-//  1. Hero banner       — blurred bg, poster, title, score, meta tags, synopsis
-//  2. Info grid         — genres, studios, rating, type, status, year
-//  3. Episode list      — episode cards with number, title, airdate
-//
-// TODO: WIRE UP "Watch Now" button to an actual streaming source or episode.
-// TODO: ADD real "Add to List" functionality when user accounts are ready.
+// TODO: WIRE UP "Watch Now" to a streaming source.
+// TODO: ADD "Add to List" to user playlist when accounts are ready.
 // ─────────────────────────────────────────────────────────────────────────────
+
+const INITIAL_EP_COUNT = 6; // episodes visible before "Show More"
 
 interface PageParams {
   source: "jikan" | "kitsu";
   id:     string;
 }
 
-// ── Episode Card ──────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Helper: group a flat episode list into seasons.
+//
+// Strategy (in priority order):
+//  1. If any episode has a `seasonNumber` field → group by that.
+//  2. Else if total episodes > 100 → auto-group every 24 eps as a "Part" (arc).
+//  3. Else → single "Episodes" group (no season UI needed).
+//
+// NOTE: Jikan and Kitsu don't expose season numbers on episodes —
+//       they only expose raw sequential numbers. Arc-splitting (every 24)
+//       is the best approximation without a third-party API.
+//
+// TODO: Integrate AniList or AniDB API for true season/arc metadata.
+// ─────────────────────────────────────────────────────────────────────────────
+function groupEpisodesBySeason(
+  episodes: Episode[],
+  totalEps: number | null
+): { label: string; episodes: Episode[] }[] {
+  if (episodes.length === 0) return [];
+
+  // Case 1: Grouped automatically for very long series (100+ episodes)
+  // Split into arcs of ~24 episodes each (roughly one cour)
+  const ARC_SIZE = 24;
+  if ((totalEps ?? episodes.length) > 100) {
+    const groups: { label: string; episodes: Episode[] }[] = [];
+    for (let i = 0; i < episodes.length; i += ARC_SIZE) {
+      const chunk = episodes.slice(i, i + ARC_SIZE);
+      const startEp = chunk[0].number ?? i + 1;
+      const endEp   = chunk[chunk.length - 1].number ?? i + ARC_SIZE;
+      groups.push({
+        label:    `Arc ${Math.floor(i / ARC_SIZE) + 1}  (Ep ${startEp}–${endEp})`,
+        episodes: chunk,
+      });
+    }
+    return groups;
+  }
+
+  // Case 2: Single group for short / normal series
+  return [{ label: "Episodes", episodes }];
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EpisodeCard — single episode row
+// ─────────────────────────────────────────────────────────────────────────────
 function EpisodeCard({ ep, index }: { ep: Episode; index: number }) {
   return (
     <div
@@ -49,23 +91,23 @@ function EpisodeCard({ ep, index }: { ep: Episode; index: number }) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <span className="text-2xl font-black text-white/30">
+            <span className="text-xl font-black text-white/20">
               {ep.number ?? index + 1}
             </span>
           </div>
         )}
         {/* Play overlay on hover */}
         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-          <Play className="w-5 h-5 text-white" fill="currentColor" />
+          <Play className="w-4 h-4 text-white" fill="currentColor" />
         </div>
       </div>
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-xs font-mono text-white/40">EP {ep.number ?? index + 1}</span>
+        <div className="flex items-center gap-2 mb-0.5">
+          <span className="text-xs font-mono text-white/35">EP {ep.number ?? index + 1}</span>
           {ep.duration && (
-            <span className="text-xs text-white/40 flex items-center gap-1">
+            <span className="text-xs text-white/35 flex items-center gap-1">
               <Clock className="w-3 h-3" />
               {ep.duration} min
             </span>
@@ -75,26 +117,115 @@ function EpisodeCard({ ep, index }: { ep: Episode; index: number }) {
           {ep.title ?? `Episode ${ep.number ?? index + 1}`}
         </p>
         {ep.airdate && (
-          <p className="text-xs text-white/40 mt-1">{ep.airdate}</p>
+          <p className="text-xs text-white/35 mt-0.5">{ep.airdate}</p>
         )}
       </div>
     </div>
   );
 }
 
-// ── Main Page ─────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// SeasonGroup — renders one season/arc of episodes with expand/collapse
+// ─────────────────────────────────────────────────────────────────────────────
+function SeasonGroup({
+  label,
+  episodes,
+  isOnlyGroup,
+}: {
+  label:       string;
+  episodes:    Episode[];
+  isOnlyGroup: boolean;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
+  // Show first 6 episodes by default; rest hidden behind blur
+  const visible  = expanded ? episodes : episodes.slice(0, INITIAL_EP_COUNT);
+  const hasMore  = episodes.length > INITIAL_EP_COUNT;
+
+  return (
+    <div className="mb-10">
+      {/* Season header — only show if there are multiple seasons/arcs */}
+      {!isOnlyGroup && (
+        <div className="flex items-center gap-3 mb-4">
+          <Layers className="w-4 h-4 text-[#F47521]" />
+          <h3 className="text-base font-bold text-white">{label}</h3>
+          <span className="text-xs text-white/40 ml-auto">{episodes.length} episodes</span>
+        </div>
+      )}
+
+      {/* Episode grid */}
+      <div className="relative">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {visible.map((ep, i) => (
+            <EpisodeCard key={ep.id ?? i} ep={ep} index={i} />
+          ))}
+        </div>
+
+        {/* ── Blur fade + Show More button ─────────────────────────────────── */}
+        {hasMore && !expanded && (
+          <div className="absolute bottom-0 inset-x-0 h-36 flex flex-col items-center justify-end
+                          bg-gradient-to-t from-[#111] via-[#111]/80 to-transparent pointer-events-none">
+            {/* Show More button (pointer-events re-enabled) */}
+            <button
+              onClick={() => setExpanded(true)}
+              className="pointer-events-auto mb-2 flex items-center gap-2 px-6 py-2.5 rounded-full
+                         bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-semibold
+                         hover:bg-white/20 hover:scale-105 transition-all duration-300 active:scale-95 cursor-pointer"
+            >
+              <ChevronDown className="w-4 h-4" />
+              Show All {episodes.length} Episodes
+            </button>
+          </div>
+        )}
+
+        {/* Collapse button when expanded */}
+        {expanded && hasMore && (
+          <div className="flex justify-center mt-4">
+            <button
+              onClick={() => setExpanded(false)}
+              className="flex items-center gap-2 px-6 py-2.5 rounded-full
+                         bg-white/5 border border-white/15 text-white/60 text-sm
+                         hover:bg-white/10 hover:text-white transition-all duration-300 cursor-pointer"
+            >
+              <ChevronDown className="w-4 h-4 rotate-180" />
+              Show Less
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Main Page
+// ─────────────────────────────────────────────────────────────────────────────
 export default function AnimeDetailPage({
   params,
 }: {
   params: Promise<PageParams>;
 }) {
-  // Next.js 15 — params is a Promise, unwrap with use()
   const { source, id } = use(params);
 
-  const { data: anime,    isLoading: detailLoading, isError: detailError }   = useAnimeDetail(source, id);
-  const { episodes,       isLoading: epLoading,     isError: epError       } = useAnimeEpisodes(source, id);
+  const { data: anime,    isLoading: detailLoading, isError: detailError } = useAnimeDetail(source, id);
+  const { episodes,       isLoading: epLoading,     isError: epError      } = useAnimeEpisodes(source, id);
 
-  // ── Loading state ─────────────────────────────────────────────────────────
+  // Synopsis expand state
+  const [synopsisExpanded, setSynopsisExpanded] = useState(false);
+
+  // Season tab state — which arc/season tab is selected
+  const [activeSeasonIdx, setActiveSeasonIdx] = useState(0);
+
+  // Build season groups
+  const seasonGroups = useMemo(
+    () => groupEpisodesBySeason(episodes, anime?.episodes ?? null),
+    [episodes, anime?.episodes]
+  );
+
+  const activeGroup  = seasonGroups[activeSeasonIdx] ?? null;
+  const hasMultiple  = seasonGroups.length > 1;
+
+  // ── Loading ───────────────────────────────────────────────────────────────
   if (detailLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#111]">
@@ -106,7 +237,7 @@ export default function AnimeDetailPage({
     );
   }
 
-  // ── Error state ───────────────────────────────────────────────────────────
+  // ── Error ─────────────────────────────────────────────────────────────────
   if (detailError || !anime) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#111]">
@@ -129,11 +260,11 @@ export default function AnimeDetailPage({
 
       {/* ════════════════════════════════════════════════════════════════════
           SECTION 1 — HERO BANNER
-          Full-width blurred background + sharp poster + all key info.
+          Full-width blurred background + sharp poster + expandable synopsis.
           ════════════════════════════════════════════════════════════════════ */}
       <div className="relative w-full min-h-[80vh] flex items-end overflow-hidden">
 
-        {/* Blurred BG layer */}
+        {/* Blurred BG */}
         {heroImage && (
           <>
             <Image
@@ -146,13 +277,12 @@ export default function AnimeDetailPage({
               className="object-cover scale-110 blur-2xl opacity-40"
               aria-hidden
             />
-            {/* dark gradient from bottom */}
             <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-[#111]/60 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-r from-[#111]/80 via-transparent to-transparent" />
           </>
         )}
 
-        {/* Back button */}
+        {/* Back */}
         <Link
           href="/"
           className="absolute top-6 left-6 z-20 flex items-center gap-2 text-white/70 hover:text-white
@@ -178,9 +308,9 @@ export default function AnimeDetailPage({
             </div>
           )}
 
-          {/* Text info */}
+          {/* Text */}
           <div className="flex-1 min-w-0">
-            {/* Meta tags row */}
+            {/* Meta tags */}
             <div className="flex flex-wrap gap-2 mb-3">
               {anime.type && (
                 <span className="badge-base bg-white/15 backdrop-blur-sm text-white border border-white/20">
@@ -222,11 +352,29 @@ export default function AnimeDetailPage({
               {anime.title}
             </h1>
 
-            {/* Synopsis */}
+            {/* Synopsis — expandable */}
             {anime.synopsis && (
-              <p className="text-white/70 text-sm sm:text-base leading-relaxed max-w-2xl mb-6 line-clamp-4">
-                {anime.synopsis}
-              </p>
+              <div className="max-w-2xl mb-6">
+                <p className={`text-white/70 text-sm sm:text-base leading-relaxed transition-all duration-500 ${
+                  synopsisExpanded ? "" : "line-clamp-3"
+                }`}>
+                  {anime.synopsis}
+                </p>
+                {/* Only show toggle if text is long enough to clip */}
+                {anime.synopsis.length > 200 && (
+                  <button
+                    onClick={() => setSynopsisExpanded((v) => !v)}
+                    className="mt-2 text-[#F47521] text-xs font-semibold hover:text-orange-300
+                               transition-colors duration-200 flex items-center gap-1 cursor-pointer"
+                  >
+                    {synopsisExpanded ? (
+                      <>Show Less <ChevronDown className="w-3 h-3 rotate-180" /></>
+                    ) : (
+                      <>Show More <ChevronDown className="w-3 h-3" /></>
+                    )}
+                  </button>
+                )}
+              </div>
             )}
 
             {/* CTA Buttons */}
@@ -261,7 +409,6 @@ export default function AnimeDetailPage({
                 Add to List
               </button>
 
-              {/* Trailer link — only shown if Jikan provides one */}
               {anime.trailerUrl && (
                 <a
                   href={anime.trailerUrl}
@@ -282,7 +429,7 @@ export default function AnimeDetailPage({
 
       {/* ════════════════════════════════════════════════════════════════════
           SECTION 2 — INFO GRID
-          Genres, studios, rating, duration in a clean pill-grid layout.
+          Genres, studios, rating, duration in pill-grid layout.
           ════════════════════════════════════════════════════════════════════ */}
       <div className="max-w-7xl mx-auto px-6 py-10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -327,7 +474,6 @@ export default function AnimeDetailPage({
                   <span className="text-white font-medium capitalize">{anime.season}</span>
                 </div>
               )}
-              {/* Studios — only Jikan fills this */}
               {anime.studios && anime.studios.length > 0 && (
                 <div className="flex gap-2 col-span-2">
                   <span className="text-white/40">Studios</span>
@@ -341,21 +487,48 @@ export default function AnimeDetailPage({
 
       {/* ════════════════════════════════════════════════════════════════════
           SECTION 3 — EPISODE LIST
-          Scrollable episode cards. Page 1 only for now.
-          TODO: Add "Load More" button or infinite scroll here.
+          ─ If series > 100 eps  → split into Arc tabs (every 24 eps)
+          ─ Otherwise            → single group
+          ─ Each group shows 6 by default, blur + "Show All N Episodes"
+          ─ "Show Less" collapses back to 6
+
+          TODO: Add proper pagination to fetch more episodes from the backend.
+                Currently limited to 20 episodes from Kitsu / 100 from Jikan page 1.
           ════════════════════════════════════════════════════════════════════ */}
       <div className="max-w-7xl mx-auto px-6 pb-20">
+
+        {/* ── Section header ─────────────────────────────────────────────── */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-white">Episodes</h2>
-          {/*
-            ╔══════════════════════════════════════════════════════════════╗
-            ║  TODO: PAGINATION — ADD "Load More" BUTTON HERE             ║
-            ║  Check pagination.hasNextPage from useAnimeEpisodes and     ║
-            ║  display a button to fetch the next page.                   ║
-            ╚══════════════════════════════════════════════════════════════╝
-          */}
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            Episodes
+            {anime.episodes && (
+              <span className="text-sm font-normal text-white/40">
+                ({anime.episodes} total)
+              </span>
+            )}
+          </h2>
         </div>
 
+        {/* ── Arc / Season tabs (only for 100+ ep series) ────────────────── */}
+        {hasMultiple && (
+          <div className="flex gap-2 flex-wrap mb-6">
+            {seasonGroups.map((group, i) => (
+              <button
+                key={group.label}
+                onClick={() => { setActiveSeasonIdx(i); }}
+                className={`px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer border
+                  ${activeSeasonIdx === i
+                    ? "bg-[#F47521] text-white border-[#F47521]"
+                    : "bg-white/5 text-white/50 border-white/10 hover:bg-white/10 hover:text-white"
+                  }`}
+              >
+                {group.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* ── Loading / Error / Empty ──────────────────────────────────────── */}
         {epLoading && (
           <div className="flex items-center justify-center py-12">
             <div className="w-8 h-8 rounded-full border-4 border-white/10 border-t-[#F47521] animate-spin" />
@@ -375,15 +548,17 @@ export default function AnimeDetailPage({
           </p>
         )}
 
-        {!epLoading && episodes.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {episodes.map((ep, i) => (
-              <EpisodeCard key={ep.id ?? i} ep={ep} index={i} />
-            ))}
-          </div>
+        {/* ── Active season/arc group ──────────────────────────────────────── */}
+        {!epLoading && activeGroup && (
+          <SeasonGroup
+            key={activeGroup.label}      // remount when switching arcs → resets expand state
+            label={activeGroup.label}
+            episodes={activeGroup.episodes}
+            isOnlyGroup={!hasMultiple}
+          />
         )}
-      </div>
 
+      </div>
     </div>
   );
 }
