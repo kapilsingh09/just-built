@@ -11,6 +11,7 @@ import {
 import type { Anime } from "@/types/anime";
 import HeroSlider from "@/components/hero/HeroSlider";
 import AnimeSlider from "@/components/anime/AnimeSlider";
+import GenreStrip from "@/components/anime/GenreStrip";
 import PlaylistModal from "@/components/playlist/PlaylistModal";
 import Section from "@/components/shared/Section";
 import Loader from "@/components/shared/Loader";
@@ -87,6 +88,14 @@ export default function Home() {
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       {/* Powered by: GET /api/anime/popular (Kitsu) */}
       <HeroSlider anime={heroAnime} onAddToPlaylist={handleAddToPlaylist} />
+
+      {/* ── Genre Strip ───────────────────────────────────────────────────
+          A horizontal scrollable strip of clickable genre pills.          */}
+      <Section className="bg-zinc-900 !py-6 md:!py-8">
+        <div className="container-main">
+          <GenreStrip />
+        </div>
+      </Section>
 
       {/* ── Trending on MAL ───────────────────────────────────────────────
           Route:  GET /api/jikan/popular
