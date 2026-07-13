@@ -3,6 +3,8 @@ import {
   getJikanAnimeById,
   getJikanEpisodes,
   getJikanRelations,
+  getJikanGenres,
+  getJikanAnimeByGenre,
 } from "../services/jikanAnimeService.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -92,6 +94,50 @@ export const getAnimeEpisodes = async (req, res) => {
 // Returns related anime (Sequel, Prequel, Side Story, etc.).
 // Used by the detail page to show "More from this Series".
 // ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/jikan/genres
+//
+// Returns the full list of anime genres from Jikan.
+// ─────────────────────────────────────────────────────────────────────────────
+export const getGenres = async (req, res) => {
+  try {
+    const { data, source } = await getJikanGenres();
+    return res.status(200).json({ success: true, source, data });
+  } catch (error) {
+    console.error("[jikanAnimeController] getGenres:", error);
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/jikan/genre/:genreId
+//
+// Returns anime filtered by genre ID.
+// Query params: page, sort, status, type
+// ─────────────────────────────────────────────────────────────────────────────
+export const getAnimeByGenre = async (req, res) => {
+  try {
+    const { genreId } = req.params;
+    const { page = "1", sort = "score", status = "", type = "" } = req.query;
+    const { data, pagination, source } = await getJikanAnimeByGenre(genreId, {
+      page:   parseInt(page, 10) || 1,
+      sort,
+      status,
+      type,
+    });
+    return res.status(200).json({ success: true, source, pagination, data });
+  } catch (error) {
+    console.error("[jikanAnimeController] getAnimeByGenre:", error);
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
 export const getAnimeRelations = async (req, res) => {
   try {
     const { id } = req.params;
