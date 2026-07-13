@@ -1,24 +1,23 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { Suspense } from "react";
-import Loader from "@/components/shared/Loader";
-import GenrePageContent from "./GenrePageContent";
-
-// ─── Genre Page Layout ────────────────────────────────────────────────────────
-// Next.js 13+ requires useSearchParams to be wrapped in a Suspense boundary.
-// We split the page into a shell (this file) and content (GenrePageContent).
+// ─── /genre/[id] — Legacy redirect ───────────────────────────────────────────
+// Genre results have moved to /results?genre=<id>&name=<name>
+// This page just redirects so old links still work.
 // ──────────────────────────────────────────────────────────────────────────────
 
-export default function GenrePage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          <Loader message="Loading genre..." />
-        </div>
-      }
-    >
-      <GenrePageContent />
-    </Suspense>
-  );
+interface PageParams {
+  id: string;
+}
+
+export default async function GenreLegacyPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<PageParams>;
+  searchParams: Promise<{ name?: string }>;
+}) {
+  const { id }   = await params;
+  const { name } = await searchParams;
+  const encoded  = name ? `&name=${encodeURIComponent(name)}` : "";
+  redirect(`/results?genre=${id}${encoded}`);
 }
