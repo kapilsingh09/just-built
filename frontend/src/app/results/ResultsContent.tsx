@@ -21,31 +21,31 @@ import PlaylistModal from "@/components/playlist/PlaylistModal";
 // ──────────────────────────────────────────────────────────────────────────────
 
 const GENRE_COLORS: Record<string, string> = {
-  Action:          "#ef4444",
-  Adventure:       "#f97316",
-  Comedy:          "#eab308",
-  Drama:           "#8b5cf6",
-  Fantasy:         "#06b6d4",
-  Horror:          "#9ca3af",
-  Mystery:         "#3b82f6",
-  Romance:         "#ec4899",
-  "Sci-Fi":        "#14b8a6",
+  Action: "#ef4444",
+  Adventure: "#f97316",
+  Comedy: "#eab308",
+  Drama: "#8b5cf6",
+  Fantasy: "#06b6d4",
+  Horror: "#9ca3af",
+  Mystery: "#3b82f6",
+  Romance: "#ec4899",
+  "Sci-Fi": "#14b8a6",
   "Slice of Life": "#f472b6",
-  Sports:          "#22c55e",
-  Supernatural:    "#a855f7",
-  Thriller:        "#64748b",
-  Mecha:           "#0ea5e9",
-  Music:           "#f59e0b",
-  Psychological:   "#7c3aed",
-  Historical:      "#b45309",
-  Military:        "#6b7280",
-  Demons:          "#dc2626",
-  Isekai:          "#10b981",
-  "Martial Arts":  "#f59e0b",
-  Magic:           "#c084fc",
-  School:          "#60a5fa",
-  "Super Power":   "#facc15",
-  Vampire:         "#be123c",
+  Sports: "#22c55e",
+  Supernatural: "#a855f7",
+  Thriller: "#64748b",
+  Mecha: "#0ea5e9",
+  Music: "#f59e0b",
+  Psychological: "#7c3aed",
+  Historical: "#b45309",
+  Military: "#6b7280",
+  Demons: "#dc2626",
+  Isekai: "#10b981",
+  "Martial Arts": "#f59e0b",
+  Magic: "#c084fc",
+  School: "#60a5fa",
+  "Super Power": "#facc15",
+  Vampire: "#be123c",
 };
 
 const GENRE_EMOJI: Record<string, string> = {
@@ -62,18 +62,18 @@ export default function ResultsContent() {
   const searchParams = useSearchParams();
 
   // ── Detect mode ────────────────────────────────────────────────────────────
-  const genreId   = searchParams.get("genre");
+  const genreId = searchParams.get("genre");
   const genreName = searchParams.get("name") ?? "";
-  const query     = searchParams.get("q")    ?? "";
-  const isSearch  = !!query && !genreId;
-  const isGenre   = !!genreId;
+  const query = searchParams.get("q") ?? "";
+  const isSearch = !!query && !genreId;
+  const isGenre = !!genreId;
 
   const accentColor = GENRE_COLORS[genreName] ?? "#F47521";
-  const emoji       = GENRE_EMOJI[genreName]  ?? (isSearch ? "🔍" : "🎌");
-  const pageTitle   = isSearch ? `"${query}"` : genreName || "Results";
+  const emoji = GENRE_EMOJI[genreName] ?? (isSearch ? "🔍" : "🎌");
+  const pageTitle = isSearch ? `"${query}"` : genreName || "Results";
 
   // ── Filters + pagination (genre mode only) ─────────────────────────────────
-  const [page, setPage]       = useState(1);
+  const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<AnimeFilters>({ sort: "score", status: "", type: "" });
 
   const handleFilterChange = (next: AnimeFilters) => {
@@ -95,7 +95,7 @@ export default function ResultsContent() {
 
   // ── Playlist modal ─────────────────────────────────────────────────────────
   const [playlistAnime, setPlaylistAnime] = useState<Anime | null>(null);
-  const [playlistOpen,  setPlaylistOpen]  = useState(false);
+  const [playlistOpen, setPlaylistOpen] = useState(false);
 
   return (
     <div style={{ minHeight: "100vh", background: "#111" }}>
@@ -110,8 +110,8 @@ export default function ResultsContent() {
         <div
           aria-hidden
           style={{
-            position:   "absolute",
-            inset:      0,
+            position: "absolute",
+            inset: 0,
             background: `
               radial-gradient(ellipse 80% 60% at 10% 0%, ${accentColor}22 0%, transparent 60%),
               radial-gradient(ellipse 60% 80% at 90% 100%, ${accentColor}14 0%, transparent 60%),
@@ -124,11 +124,11 @@ export default function ResultsContent() {
         <div
           aria-hidden
           style={{
-            position:       "absolute",
-            inset:          0,
+            position: "absolute",
+            inset: 0,
             backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E\")",
-            backgroundSize:  "200px 200px",
-            opacity:         0.4,
+            backgroundSize: "200px 200px",
+            opacity: 0.4,
           }}
         />
 
@@ -153,9 +153,9 @@ export default function ResultsContent() {
             {isSearch
               ? <span>Search</span>
               : <><Link href="/explore" style={{ color: "rgba(255,255,255,0.4)", textDecoration: "none" }}
-                  onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = "#fff")}
-                  onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.4)")}
-                >Explore</Link><ChevronRight style={{ width: "0.8rem", height: "0.8rem" }} /></>
+                onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = "#fff")}
+                onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = "rgba(255,255,255,0.4)")}
+              >Explore</Link><ChevronRight style={{ width: "0.8rem", height: "0.8rem" }} /></>
             }
             <span style={{ color: accentColor, fontWeight: 600 }}>{pageTitle}</span>
           </nav>
@@ -169,19 +169,19 @@ export default function ResultsContent() {
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.4, ease: "backOut" }}
               style={{
-                display:        "flex",
-                alignItems:     "center",
+                display: "flex",
+                alignItems: "center",
                 justifyContent: "center",
-                width:          "4rem",
-                height:         "4rem",
-                borderRadius:   "1.25rem",
-                background:     "rgba(255,255,255,0.07)",
+                width: "4rem",
+                height: "4rem",
+                borderRadius: "1.25rem",
+                background: "rgba(255,255,255,0.07)",
                 backdropFilter: "blur(16px)",
                 WebkitBackdropFilter: "blur(16px)",
-                border:         `1px solid ${accentColor}40`,
-                boxShadow:      `0 8px 32px ${accentColor}25, inset 0 1px 0 rgba(255,255,255,0.1)`,
-                fontSize:       "1.75rem",
-                flexShrink:     0,
+                border: `1px solid ${accentColor}40`,
+                boxShadow: `0 8px 32px ${accentColor}25, inset 0 1px 0 rgba(255,255,255,0.1)`,
+                fontSize: "1.75rem",
+                flexShrink: 0,
               }}
             >
               {isSearch ? <Search style={{ width: "1.5rem", height: "1.5rem", color: accentColor }} /> : emoji}
@@ -206,10 +206,10 @@ export default function ResultsContent() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.05 }}
                 style={{
-                  fontSize:   "clamp(2rem, 5vw, 3rem)",
+                  fontSize: "clamp(2rem, 5vw, 3rem)",
                   fontWeight: 900,
-                  color:      "#fff",
-                  margin:     0,
+                  color: "#fff",
+                  margin: 0,
                   lineHeight: 1.1,
                   letterSpacing: "-0.02em",
                 }}
@@ -254,25 +254,25 @@ export default function ResultsContent() {
         {isSearch && (
           <div
             style={{
-              display:        "flex",
-              flexDirection:  "column",
-              alignItems:     "center",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
               justifyContent: "center",
-              padding:        "5rem 1rem",
-              gap:            "1rem",
-              textAlign:      "center",
+              padding: "5rem 1rem",
+              gap: "1rem",
+              textAlign: "center",
             }}
           >
             <div
               style={{
-                width:          "4rem",
-                height:         "4rem",
-                borderRadius:   "50%",
-                background:     "rgba(255,255,255,0.05)",
+                width: "4rem",
+                height: "4rem",
+                borderRadius: "50%",
+                background: "rgba(255,255,255,0.05)",
                 backdropFilter: "blur(12px)",
-                border:         "1px solid rgba(255,255,255,0.1)",
-                display:        "flex",
-                alignItems:     "center",
+                border: "1px solid rgba(255,255,255,0.1)",
+                display: "flex",
+                alignItems: "center",
                 justifyContent: "center",
               }}
             >
@@ -287,17 +287,17 @@ export default function ResultsContent() {
             <Link
               href="/"
               style={{
-                display:      "inline-flex",
-                alignItems:   "center",
-                gap:          "0.375rem",
-                padding:      "0.625rem 1.5rem",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.375rem",
+                padding: "0.625rem 1.5rem",
                 borderRadius: "var(--radius-full)",
-                background:   "linear-gradient(135deg, var(--accent), var(--accent-secondary))",
-                color:        "#fff",
-                fontSize:     "0.875rem",
-                fontWeight:   700,
+                background: "linear-gradient(135deg, var(--accent), var(--accent-secondary))",
+                color: "#fff",
+                fontSize: "0.875rem",
+                fontWeight: 700,
                 textDecoration: "none",
-                transition:   "opacity 0.2s",
+                transition: "opacity 0.2s",
               }}
             >
               Back to Home
@@ -337,22 +337,22 @@ export default function ResultsContent() {
               disabled={page <= 1}
               aria-label="Previous page"
               style={{
-                display:      "flex",
-                alignItems:   "center",
-                gap:          "0.375rem",
-                padding:      "0.65rem 1.4rem",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.375rem",
+                padding: "0.65rem 1.4rem",
                 borderRadius: "var(--radius-full)",
-                background:   "rgba(255,255,255,0.06)",
+                background: "rgba(255,255,255,0.06)",
                 backdropFilter: "blur(12px)",
                 WebkitBackdropFilter: "blur(12px)",
-                border:       "1px solid rgba(255,255,255,0.10)",
-                color:        page <= 1 ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.85)",
-                fontSize:     "0.875rem",
-                fontWeight:   600,
-                cursor:       page <= 1 ? "not-allowed" : "pointer",
-                opacity:      page <= 1 ? 0.5 : 1,
-                transition:   "all 0.25s",
-                fontFamily:   "var(--font-sans)",
+                border: "1px solid rgba(255,255,255,0.10)",
+                color: page <= 1 ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.85)",
+                fontSize: "0.875rem",
+                fontWeight: 600,
+                cursor: page <= 1 ? "not-allowed" : "pointer",
+                opacity: page <= 1 ? 0.5 : 1,
+                transition: "all 0.25s",
+                fontFamily: "var(--font-sans)",
               }}
             >
               <ChevronLeft style={{ width: "1rem", height: "1rem" }} />
@@ -361,19 +361,19 @@ export default function ResultsContent() {
 
             {/* Page indicator — glassmorphism style */}
             <div style={{
-              display:      "flex",
-              alignItems:   "center",
-              gap:          "0.4rem",
-              padding:      "0.65rem 1.4rem",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.4rem",
+              padding: "0.65rem 1.4rem",
               borderRadius: "var(--radius-full)",
-              background:   `linear-gradient(135deg, ${accentColor}20, ${accentColor}0d)`,
+              background: `linear-gradient(135deg, ${accentColor}20, ${accentColor}0d)`,
               backdropFilter: "blur(12px)",
               WebkitBackdropFilter: "blur(12px)",
-              border:       `1px solid ${accentColor}35`,
-              boxShadow:    `0 4px 20px ${accentColor}15`,
-              fontSize:     "0.875rem",
-              fontWeight:   700,
-              color:        "#fff",
+              border: `1px solid ${accentColor}35`,
+              boxShadow: `0 4px 20px ${accentColor}15`,
+              fontSize: "0.875rem",
+              fontWeight: 700,
+              color: "#fff",
             }}>
               <span style={{ color: "rgba(255,255,255,0.5)", fontWeight: 400 }}>Page</span>
               <span style={{ color: accentColor }}>{page}</span>
@@ -390,25 +390,25 @@ export default function ResultsContent() {
               disabled={!pagination.hasNextPage}
               aria-label="Next page"
               style={{
-                display:      "flex",
-                alignItems:   "center",
-                gap:          "0.375rem",
-                padding:      "0.65rem 1.4rem",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.375rem",
+                padding: "0.65rem 1.4rem",
                 borderRadius: "var(--radius-full)",
-                background:   !pagination.hasNextPage
+                background: !pagination.hasNextPage
                   ? "rgba(255,255,255,0.06)"
                   : `linear-gradient(135deg, ${accentColor}cc, ${accentColor})`,
                 backdropFilter: "blur(12px)",
                 WebkitBackdropFilter: "blur(12px)",
-                border:       `1px solid ${!pagination.hasNextPage ? "rgba(255,255,255,0.10)" : accentColor}`,
-                color:        !pagination.hasNextPage ? "rgba(255,255,255,0.25)" : "#fff",
-                fontSize:     "0.875rem",
-                fontWeight:   600,
-                cursor:       !pagination.hasNextPage ? "not-allowed" : "pointer",
-                opacity:      !pagination.hasNextPage ? 0.5 : 1,
-                boxShadow:    !pagination.hasNextPage ? "none" : `0 6px 24px ${accentColor}40`,
-                transition:   "all 0.25s",
-                fontFamily:   "var(--font-sans)",
+                border: `1px solid ${!pagination.hasNextPage ? "rgba(255,255,255,0.10)" : accentColor}`,
+                color: !pagination.hasNextPage ? "rgba(255,255,255,0.25)" : "#fff",
+                fontSize: "0.875rem",
+                fontWeight: 600,
+                cursor: !pagination.hasNextPage ? "not-allowed" : "pointer",
+                opacity: !pagination.hasNextPage ? 0.5 : 1,
+                boxShadow: !pagination.hasNextPage ? "none" : `0 6px 24px ${accentColor}40`,
+                transition: "all 0.25s",
+                fontFamily: "var(--font-sans)",
               }}
             >
               Next
