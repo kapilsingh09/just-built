@@ -6,40 +6,9 @@ import { useJikanGenres } from "@/hooks/useGenre";
 import type { Genre } from "@/hooks/useGenre";
 
 // ─── GenreStrip ───────────────────────────────────────────────────────────────
-// Horizontal scrollable strip of glassmorphism genre cards.
+// Flex-wrapped list of genre tags (document-style pills).
 // Clicking a genre navigates to /results?genre=<id>&name=<name>
 // ──────────────────────────────────────────────────────────────────────────────
-
-const GENRE_META: Record<string, { emoji: string }> = {
-  Action: { emoji: "⚔️" },
-  Adventure: { emoji: "🗺️" },
-  Comedy: { emoji: "😂" },
-  Drama: { emoji: "🎭" },
-  Fantasy: { emoji: "🧙" },
-  Horror: { emoji: "👻" },
-  Mystery: { emoji: "🔍" },
-  Romance: { emoji: "💕" },
-  "Sci-Fi": { emoji: "🚀" },
-  "Slice of Life": { emoji: "🌸" },
-  Sports: { emoji: "⚽" },
-  Supernatural: { emoji: "✨" },
-  Thriller: { emoji: "😱" },
-  Mecha: { emoji: "🤖" },
-  Music: { emoji: "🎵" },
-  Psychological: { emoji: "🧠" },
-  Historical: { emoji: "📜" },
-  Military: { emoji: "🎖️" },
-  Demons: { emoji: "😈" },
-  Isekai: { emoji: "🌀" },
-  "Martial Arts": { emoji: "🥋" },
-  Magic: { emoji: "🪄" },
-  School: { emoji: "🏫" },
-  "Super Power": { emoji: "⚡" },
-  Vampire: { emoji: "🧛" },
-};
-
-const DEFAULT_META = { emoji: "🎌" };
-const STRIP_LIMIT = 20;
 
 interface GenrePillProps {
   genre: Genre;
@@ -48,14 +17,13 @@ interface GenrePillProps {
 
 function GenreCard({ genre, index }: GenrePillProps) {
   const router = useRouter();
-  const meta = GENRE_META[genre.name] ?? DEFAULT_META;
 
   return (
     <motion.button
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, delay: index * 0.04, ease: "easeOut" }}
-      whileHover={{ scale: 1.05, y: -4 }}
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.2, delay: index * 0.02, ease: "easeOut" }}
+      whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       onClick={() =>
         router.push(`/results?genre=${genre.id}&name=${encodeURIComponent(genre.name)}`)
@@ -63,63 +31,33 @@ function GenreCard({ genre, index }: GenrePillProps) {
       aria-label={`Browse ${genre.name} anime`}
       className="genre-card-btn"
       style={{
-        flexShrink: 0,
-        display: "flex",
-        flexDirection: "column",
+        display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
-        gap: "0.5rem",
-        width: "7.5rem",
-        height: "5.5rem",
-        borderRadius: "var(--radius-xl)",
+        padding: "0.5rem 1rem",
+        borderRadius: "var(--radius-full)",
         background: "var(--card)",
         border: "1px solid var(--border)",
-        boxShadow: "var(--shadow-sm)",
+        color: "var(--primary)",
+        fontSize: "0.85rem",
+        fontWeight: 500,
         cursor: "pointer",
-        position: "relative",
-        overflow: "hidden",
-        transition: "all var(--transition-base)",
+        transition: "all var(--transition-fast)",
       }}
       onMouseEnter={(e) => {
         const el = e.currentTarget as HTMLButtonElement;
-        el.style.background = "var(--surface)";
+        el.style.background = "var(--accent)";
         el.style.borderColor = "var(--accent)";
-        el.style.boxShadow = "var(--shadow-hover)";
+        el.style.color = "#fff";
       }}
       onMouseLeave={(e) => {
         const el = e.currentTarget as HTMLButtonElement;
         el.style.background = "var(--card)";
         el.style.borderColor = "var(--border)";
-        el.style.boxShadow = "var(--shadow-sm)";
+        el.style.color = "var(--primary)";
       }}
     >
-      {/* Top-right color dot */}
-      <div
-        aria-hidden
-        style={{
-          position: "absolute",
-          top: "0.5rem",
-          right: "0.5rem",
-          width: "6px",
-          height: "6px",
-          borderRadius: "50%",
-          background: "var(--accent)",
-          opacity: 0.8,
-          boxShadow: `0 0 6px var(--accent)`,
-        }}
-      />
-      <span style={{ fontSize: "1.75rem", lineHeight: 1 }}>{meta.emoji}</span>
-      <span style={{
-        fontSize: "0.75rem",
-        fontWeight: 600,
-        color: "var(--primary)",
-        textAlign: "center",
-        lineHeight: 1.25,
-        paddingInline: "0.4rem",
-        letterSpacing: "0.01em",
-      }}>
-        {genre.name}
-      </span>
+      {genre.name}
     </motion.button>
   );
 }
@@ -127,14 +65,17 @@ function GenreCard({ genre, index }: GenrePillProps) {
 // ─── GenreStrip ───────────────────────────────────────────────────────────────
 export default function GenreStrip() {
   const { genres, isLoading } = useJikanGenres();
-  const topGenres = genres.slice(0, STRIP_LIMIT);
+  // Show a good amount of genres since it's wrapped now.
+  // We'll show all of them if there aren't too many, or slice if preferred.
+  // We'll slice to 30 just to be safe, but typically tags take less space.
+  const topGenres = genres.slice(0, 30);
 
   return (
     <section aria-label="Browse by genre">
       <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "1rem" }}>
         <div>
           <h2 style={{ fontSize: "1.2rem", fontWeight: 700, color: "var(--primary)", margin: 0 }}>
-            🎌 Browse by Genre
+            Browse by Genre
           </h2>
           <p style={{ fontSize: "0.78rem", color: "var(--secondary)", marginTop: "0.2rem" }}>
             Click a genre to explore anime
@@ -143,17 +84,16 @@ export default function GenreStrip() {
       </div>
 
       <div
-        className="hide-scrollbar"
-        style={{ display: "flex", gap: "0.75rem", overflowX: "auto", paddingBottom: "1rem", paddingTop: "0.5rem" }}
+        style={{ display: "flex", flexWrap: "wrap", gap: "0.6rem", paddingBottom: "1rem" }}
       >
         {isLoading
-          ? Array.from({ length: 12 }).map((_, i) => (
+          ? Array.from({ length: 15 }).map((_, i) => (
             <div key={i} style={{
-              flexShrink: 0, width: "7.5rem", height: "5.5rem",
-              borderRadius: "var(--radius-xl)",
+              width: "6rem", height: "2.2rem",
+              borderRadius: "var(--radius-full)",
               background: "var(--card)",
               border: "1px solid var(--border)",
-              animation: `pulse 1.5s ease-in-out ${i * 0.08}s infinite`,
+              animation: `pulse 1.5s ease-in-out ${i * 0.05}s infinite`,
             }} />
           ))
           : topGenres.map((genre, i) => (
@@ -164,3 +104,4 @@ export default function GenreStrip() {
     </section>
   );
 }
+  
