@@ -10,35 +10,35 @@ import type { Genre } from "@/hooks/useGenre";
 // Clicking a genre navigates to /results?genre=<id>&name=<name>
 // ──────────────────────────────────────────────────────────────────────────────
 
-const GENRE_META: Record<string, { emoji: string; color: string }> = {
-  Action: { emoji: "⚔️", color: "#ef4444" },
-  Adventure: { emoji: "🗺️", color: "#f97316" },
-  Comedy: { emoji: "😂", color: "#eab308" },
-  Drama: { emoji: "🎭", color: "#8b5cf6" },
-  Fantasy: { emoji: "🧙", color: "#06b6d4" },
-  Horror: { emoji: "👻", color: "#6b7280" },
-  Mystery: { emoji: "🔍", color: "#3b82f6" },
-  Romance: { emoji: "💕", color: "#ec4899" },
-  "Sci-Fi": { emoji: "🚀", color: "#14b8a6" },
-  "Slice of Life": { emoji: "🌸", color: "#f472b6" },
-  Sports: { emoji: "⚽", color: "#22c55e" },
-  Supernatural: { emoji: "✨", color: "#a855f7" },
-  Thriller: { emoji: "😱", color: "#64748b" },
-  Mecha: { emoji: "🤖", color: "#0ea5e9" },
-  Music: { emoji: "🎵", color: "#f59e0b" },
-  Psychological: { emoji: "🧠", color: "#7c3aed" },
-  Historical: { emoji: "📜", color: "#92400e" },
-  Military: { emoji: "🎖️", color: "#4b5563" },
-  Demons: { emoji: "😈", color: "#dc2626" },
-  Isekai: { emoji: "🌀", color: "#10b981" },
-  "Martial Arts": { emoji: "🥋", color: "#f59e0b" },
-  Magic: { emoji: "🪄", color: "#c084fc" },
-  School: { emoji: "🏫", color: "#60a5fa" },
-  "Super Power": { emoji: "⚡", color: "#facc15" },
-  Vampire: { emoji: "🧛", color: "#9f1239" },
+const GENRE_META: Record<string, { emoji: string }> = {
+  Action: { emoji: "⚔️" },
+  Adventure: { emoji: "🗺️" },
+  Comedy: { emoji: "😂" },
+  Drama: { emoji: "🎭" },
+  Fantasy: { emoji: "🧙" },
+  Horror: { emoji: "👻" },
+  Mystery: { emoji: "🔍" },
+  Romance: { emoji: "💕" },
+  "Sci-Fi": { emoji: "🚀" },
+  "Slice of Life": { emoji: "🌸" },
+  Sports: { emoji: "⚽" },
+  Supernatural: { emoji: "✨" },
+  Thriller: { emoji: "😱" },
+  Mecha: { emoji: "🤖" },
+  Music: { emoji: "🎵" },
+  Psychological: { emoji: "🧠" },
+  Historical: { emoji: "📜" },
+  Military: { emoji: "🎖️" },
+  Demons: { emoji: "😈" },
+  Isekai: { emoji: "🌀" },
+  "Martial Arts": { emoji: "🥋" },
+  Magic: { emoji: "🪄" },
+  School: { emoji: "🏫" },
+  "Super Power": { emoji: "⚡" },
+  Vampire: { emoji: "🧛" },
 };
 
-const DEFAULT_META = { emoji: "🎌", color: "#F47521" };
+const DEFAULT_META = { emoji: "🎌" };
 const STRIP_LIMIT = 20;
 
 interface GenrePillProps {
@@ -55,8 +55,8 @@ function GenreCard({ genre, index }: GenrePillProps) {
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: index * 0.04, ease: "easeOut" }}
-      whileHover={{ scale: 1.07, y: -4 }}
-      whileTap={{ scale: 0.94 }}
+      whileHover={{ scale: 1.05, y: -4 }}
+      whileTap={{ scale: 0.95 }}
       onClick={() =>
         router.push(`/results?genre=${genre.id}&name=${encodeURIComponent(genre.name)}`)
       }
@@ -68,32 +68,29 @@ function GenreCard({ genre, index }: GenrePillProps) {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: "0.45rem",
-        width: "7rem",
-        height: "5.25rem",
-        borderRadius: "1.125rem",
-        // Glassmorphism
-        background: `linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03))`,
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
-        border: `1px solid rgba(255,255,255,0.10)`,
-        boxShadow: `0 4px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.08)`,
+        gap: "0.5rem",
+        width: "7.5rem",
+        height: "5.5rem",
+        borderRadius: "var(--radius-xl)",
+        background: "var(--card)",
+        border: "1px solid var(--border)",
+        boxShadow: "var(--shadow-sm)",
         cursor: "pointer",
         position: "relative",
         overflow: "hidden",
-        transition: "all 300ms cubic-bezier(0.25, 0.1, 0.25, 1)",
+        transition: "all var(--transition-base)",
       }}
       onMouseEnter={(e) => {
         const el = e.currentTarget as HTMLButtonElement;
-        el.style.background = `linear-gradient(135deg, ${meta.color}28, ${meta.color}12)`;
-        el.style.borderColor = `${meta.color}50`;
-        el.style.boxShadow = `0 8px 28px ${meta.color}30, inset 0 1px 0 rgba(255,255,255,0.12)`;
+        el.style.background = "var(--surface)";
+        el.style.borderColor = "var(--accent)";
+        el.style.boxShadow = "var(--shadow-hover)";
       }}
       onMouseLeave={(e) => {
         const el = e.currentTarget as HTMLButtonElement;
-        el.style.background = `linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03))`;
-        el.style.borderColor = `rgba(255,255,255,0.10)`;
-        el.style.boxShadow = `0 4px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.08)`;
+        el.style.background = "var(--card)";
+        el.style.borderColor = "var(--border)";
+        el.style.boxShadow = "var(--shadow-sm)";
       }}
     >
       {/* Top-right color dot */}
@@ -106,19 +103,19 @@ function GenreCard({ genre, index }: GenrePillProps) {
           width: "6px",
           height: "6px",
           borderRadius: "50%",
-          background: meta.color,
-          opacity: 0.7,
-          boxShadow: `0 0 6px ${meta.color}`,
+          background: "var(--accent)",
+          opacity: 0.8,
+          boxShadow: `0 0 6px var(--accent)`,
         }}
       />
-      <span style={{ fontSize: "1.6rem", lineHeight: 1 }}>{meta.emoji}</span>
+      <span style={{ fontSize: "1.75rem", lineHeight: 1 }}>{meta.emoji}</span>
       <span style={{
-        fontSize: "0.7rem",
-        fontWeight: 700,
-        color: "#fff",
+        fontSize: "0.75rem",
+        fontWeight: 600,
+        color: "var(--primary)",
         textAlign: "center",
         lineHeight: 1.25,
-        paddingInline: "0.3rem",
+        paddingInline: "0.4rem",
         letterSpacing: "0.01em",
       }}>
         {genre.name}
@@ -136,7 +133,7 @@ export default function GenreStrip() {
     <section aria-label="Browse by genre">
       <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "1rem" }}>
         <div>
-          <h2 style={{ fontSize: "1.2rem", fontWeight: 700, color: "#fff", margin: 0 }}>
+          <h2 style={{ fontSize: "1.2rem", fontWeight: 700, color: "var(--primary)", margin: 0 }}>
             🎌 Browse by Genre
           </h2>
           <p style={{ fontSize: "0.78rem", color: "var(--secondary)", marginTop: "0.2rem" }}>
@@ -147,15 +144,15 @@ export default function GenreStrip() {
 
       <div
         className="hide-scrollbar"
-        style={{ display: "flex", gap: "0.6rem", overflowX: "auto", paddingBottom: "0.5rem" }}
+        style={{ display: "flex", gap: "0.75rem", overflowX: "auto", paddingBottom: "1rem", paddingTop: "0.5rem" }}
       >
         {isLoading
           ? Array.from({ length: 12 }).map((_, i) => (
             <div key={i} style={{
-              flexShrink: 0, width: "7rem", height: "5.25rem",
-              borderRadius: "1.125rem",
-              background: "linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02))",
-              border: "1px solid rgba(255,255,255,0.08)",
+              flexShrink: 0, width: "7.5rem", height: "5.5rem",
+              borderRadius: "var(--radius-xl)",
+              background: "var(--card)",
+              border: "1px solid var(--border)",
               animation: `pulse 1.5s ease-in-out ${i * 0.08}s infinite`,
             }} />
           ))
