@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, Plus, Star, Tv, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import type { Anime } from "@/types/anime";
 import AnimeBadge from "../anime/AnimeBadge";
 import Button from "../buttons/Button";
@@ -208,13 +209,15 @@ export default function HeroSlider({ anime, onAddToPlaylist }: HeroSliderProps) 
             </motion.div>
           </AnimatePresence>
                 <div className="flex items-center gap-3">
-                  <Button
-                    variant="secondary"
-                    size="lg"
-                    icon={<Play className="w-5 h-5 " fill="currentColor" />}
-                  >
-                    Watch Now
-                  </Button>
+                  <Link href={`/anime/${currentAnime.source}/${currentAnime.id}`}>
+                    <Button
+                      variant="secondary"
+                      size="lg"
+                      icon={<Play className="w-5 h-5 " fill="currentColor" />}
+                    >
+                      Watch Now
+                    </Button>
+                  </Link>
                   <Button
                     size="lg"
                     className="!bg-white/15 !border-white/25 !text-white hover:!bg-white/25 backdrop-blur-sm"

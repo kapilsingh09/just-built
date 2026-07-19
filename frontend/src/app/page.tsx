@@ -91,11 +91,11 @@ export default function Home() {
 
       {/* ── Genre Strip ───────────────────────────────────────────────────
           A horizontal scrollable strip of clickable genre pills.          */}
-      <Section className="bg-zinc-900 !py-6 md:!py-8">
+      {/* <Section className="bg-zinc-900 !py-6 md:!py-8">
         <div className="container-main">
           <GenreStrip />
         </div>
-      </Section>
+      </Section> */}
 
       {/* ── Trending on MAL ───────────────────────────────────────────────
           Route:  GET /api/jikan/popular

@@ -59,7 +59,7 @@ export default function AnimeCard({ anime, onAddToPlaylist }: AnimeCardProps) {
         )}
 
         {/* ── Bottom Overlay: Title & Add Button ─────────────────────────── */}
-        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-16 pb-3 px-3 flex items-end justify-between z-10 transform translate-y-0 transition-transform duration-300">
+        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent h-30 backdrop-blur-md pb-3 px-3 flex items-end justify-between z-10 transform translate-y-0 transition-transform duration-300">
           <h3 className="font-semibold text-sm text-white line-clamp-2 pr-2">
             {anime.title ?? "Untitled"}
           </h3>
