@@ -10,18 +10,13 @@ import {
 import { useAnimeDetail, useAnimeEpisodes, useAnimeRelations } from "@/hooks/useAnimeDetail";
 import type { Episode } from "@/types/anime";
 
-// ─────────────────────────────────────────────────────────────────────────────
 // /anime/[source]/[id] — Anime Detail Page
-//
 // Sections:
 //  1. Hero banner       — blurred bg, poster, title, score, expandable synopsis
 //  2. Info grid         — genres (white pill / black text), studios, rating
 //  3. Episode list      — arc tabs (100+ eps), 6 default, blur + Show More
 //  4. More from series  — related anime from Jikan relations API
-//
-// TODO: WIRE "Watch Now" to a streaming source.
-// TODO: ADD "Add to List" to user playlist when accounts are ready.
-// ─────────────────────────────────────────────────────────────────────────────
+
 
 const INITIAL_EP_COUNT = 6;
 
@@ -59,9 +54,20 @@ function groupEpisodesBySeason(
   return [{ label: "Episodes", episodes }];
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// YouTube SVG icon (official brand red)
-// ─────────────────────────────────────────────────────────────────────────────
+function getYouTubeWatchUrl(url: string | null): string {
+  if (!url) return "";
+  try {
+    const urlObj = new URL(url);
+    if (urlObj.pathname.startsWith("/embed/")) {
+      const videoId = urlObj.pathname.split("/")[2];
+      return `https://www.youtube.com/watch?v=${videoId}`;
+    }
+    return url;
+  } catch {
+    return url;
+  }
+}
+
 function YouTubeIcon({ size = 16 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -70,9 +76,6 @@ function YouTubeIcon({ size = 16 }: { size?: number }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// EpisodeCard — single episode row
-// ─────────────────────────────────────────────────────────────────────────────
 function EpisodeCard({ ep, index }: { ep: Episode; index: number }) {
   return (
     <div className="flex gap-4 items-start p-4 rounded-2xl bg-white/5 border border-white/10
@@ -111,9 +114,6 @@ function EpisodeCard({ ep, index }: { ep: Episode; index: number }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SeasonGroup — one arc of episodes with show-more blur effect
-// ─────────────────────────────────────────────────────────────────────────────
 function SeasonGroup({ label, episodes, isOnlyGroup }: {
   label:       string;
   episodes:    Episode[];
@@ -173,9 +173,6 @@ function SeasonGroup({ label, episodes, isOnlyGroup }: {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// RelationBadge colours per relation type
-// ─────────────────────────────────────────────────────────────────────────────
 const RELATION_COLORS: Record<string, string> = {
   "Sequel":              "bg-blue-500/15 text-blue-300 border-blue-500/25",
   "Prequel":             "bg-purple-500/15 text-purple-300 border-purple-500/25",
@@ -363,7 +360,7 @@ export default function AnimeDetailPage({ params }: { params: Promise<PageParams
               {/* YouTube Trailer button — YouTube red + official icon + ExternalLink arrow */}
               {anime.trailerUrl && (
                 <a
-                  href={anime.trailerUrl}
+                  href={getYouTubeWatchUrl(anime.trailerUrl)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm

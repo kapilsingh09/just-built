@@ -59,7 +59,20 @@ export default function AnimeCard({ anime, onAddToPlaylist }: AnimeCardProps) {
         )}
 
         {/* ── Bottom Overlay: Title & Add Button ─────────────────────────── */}
-        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent h-30 backdrop-blur-md pb-3 px-3 flex items-end justify-between z-10 transform translate-y-0 transition-transform duration-300">
+        <div className="absolute bottom-0 inset-x-0 h-30 flex items-end justify-between px-3 pb-3 z-10 transform translate-y-0 transition-transform duration-300">
+          
+          {/* Background Gradient Layer */}
+          <div className="absolute inset-0 -z-20 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
+          
+          {/* Smooth Blur Layer */}
+          <div 
+            className="absolute inset-0 -z-10 backdrop-blur-md"
+            style={{
+              WebkitMaskImage: 'linear-gradient(to top, black 0%, transparent 100%)',
+              maskImage: 'linear-gradient(to top, black 0%, transparent 100%)'
+            }}
+          />
+
           <h3 className="font-semibold text-sm text-white line-clamp-2 pr-2">
             {anime.title ?? "Untitled"}
           </h3>
