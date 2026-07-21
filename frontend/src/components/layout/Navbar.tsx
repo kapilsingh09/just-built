@@ -256,7 +256,7 @@ export default function Navbar() {
     backdrop-blur-2xl
     backdrop-saturate-200
     shadow-[0_8px_32px_rgba(0,0,0,0.35)]
-    py-3
+    py-3  
     text-center
     font-semibold
     text-white

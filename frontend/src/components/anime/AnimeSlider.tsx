@@ -107,7 +107,7 @@ export default function AnimeSlider({
         <div
           ref={scrollRef}
           onScroll={checkScroll}
-          className="flex gap-3 overflow-x-auto hide-scrollbar scroll-smooth pb-2 px-1"
+          className="flex gap-3 overflow-x-auto hide-scrollbar scroll-smooth py-6 px-2 -my-6"
           style={{ scrollSnapType: "x mandatory" }}
         >
           {data.map((anime) => (

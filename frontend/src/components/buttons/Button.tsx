@@ -36,9 +36,9 @@ const variantStyles: Record<ButtonVariant, string> = {
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
-  sm: "text-xs px-3 py-1.5 rounded-lg gap-1.5",
-  md: "text-sm px-5 py-2.5 rounded-xl gap-2",
-  lg: "text-base px-7 py-3 rounded-xl gap-2.5",
+  sm: "text-xs px-3 py-1.5 rounded-xl gap-1.5",
+  md: "text-sm px-5 py-2.5 rounded-md gap-2",
+  lg: "text-base px-7 py-3 rounded-[28px] gap-2.5",
 };
 
 export default function Button({

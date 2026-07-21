@@ -101,10 +101,9 @@ export default function ResultsContent() {
     <div style={{ minHeight: "100vh", background: "#111" }}>
 
       {/* ════════════════════════════════════════════════════════════════════
-          HERO — matches the anime detail page aesthetic exactly
-          Blurred gradient bg + glassmorphism header card
+          HERO — Sleek and minimal gradient header
           ════════════════════════════════════════════════════════════════════ */}
-      <div className="relative w-full overflow-hidden" style={{ minHeight: "22vh", display: "flex", alignItems: "flex-end" }}>
+      <div className="relative w-full overflow-hidden" style={{ display: "flex", alignItems: "flex-end" }}>
 
         {/* Ambient gradient backdrop */}
         <div
@@ -113,22 +112,9 @@ export default function ResultsContent() {
             position: "absolute",
             inset: 0,
             background: `
-              radial-gradient(ellipse 80% 60% at 10% 0%, ${accentColor}22 0%, transparent 60%),
-              radial-gradient(ellipse 60% 80% at 90% 100%, ${accentColor}14 0%, transparent 60%),
+              radial-gradient(ellipse 60% 50% at 50% 0%, ${accentColor}20 0%, transparent 70%),
               linear-gradient(180deg, #0d0d0d 0%, #111 100%)
             `,
-          }}
-        />
-
-        {/* Noise texture overlay */}
-        <div
-          aria-hidden
-          style={{
-            position: "absolute",
-            inset: 0,
-            backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E\")",
-            backgroundSize: "200px 200px",
-            opacity: 0.4,
           }}
         />
 
@@ -138,7 +124,7 @@ export default function ResultsContent() {
         {/* Content */}
         <div
           className="container-main"
-          style={{ position: "relative", zIndex: 1, paddingTop: "5rem", paddingBottom: "2.5rem" }}
+          style={{ position: "relative", zIndex: 1, paddingTop: "4rem", paddingBottom: "2rem" }}
         >
           {/* Breadcrumb */}
           <nav
@@ -161,26 +147,21 @@ export default function ResultsContent() {
           </nav>
 
           {/* Title block */}
-          <div style={{ display: "flex", alignItems: "center", gap: "1.25rem", flexWrap: "wrap" }}>
-
-            {/* Glass icon badge */}
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap", marginTop: "1rem" }}>
             <motion.div
-              initial={{ scale: 0.7, opacity: 0 }}
+              initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.4, ease: "backOut" }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                width: "4rem",
-                height: "4rem",
-                borderRadius: "1.25rem",
-                background: "rgba(255,255,255,0.07)",
-                backdropFilter: "blur(16px)",
-                WebkitBackdropFilter: "blur(16px)",
+                width: "3.5rem",
+                height: "3.5rem",
+                borderRadius: "1rem",
+                background: `linear-gradient(135deg, ${accentColor}33, ${accentColor}11)`,
                 border: `1px solid ${accentColor}40`,
-                boxShadow: `0 8px 32px ${accentColor}25, inset 0 1px 0 rgba(255,255,255,0.1)`,
-                fontSize: "1.75rem",
+                fontSize: "1.5rem",
                 flexShrink: 0,
               }}
             >
@@ -188,29 +169,16 @@ export default function ResultsContent() {
             </motion.div>
 
             <div>
-              <motion.div
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: 0.1 }}
-                style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.25rem" }}
-              >
-                {isSearch && (
-                  <span style={{ fontSize: "0.8rem", fontWeight: 700, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                    Search Results for
-                  </span>
-                )}
-              </motion.div>
-
               <motion.h1
-                initial={{ opacity: 0, y: 8 }}
+                initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.05 }}
+                transition={{ duration: 0.4, delay: 0.1 }}
                 style={{
-                  fontSize: "clamp(2rem, 5vw, 3rem)",
-                  fontWeight: 900,
+                  fontSize: "2.25rem",
+                  fontWeight: 800,
                   color: "#fff",
                   margin: 0,
-                  lineHeight: 1.1,
+                  lineHeight: 1.2,
                   letterSpacing: "-0.02em",
                 }}
               >
@@ -226,7 +194,7 @@ export default function ResultsContent() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.2 }}
-                  style={{ fontSize: "0.9rem", color: "rgba(255,255,255,0.4)", marginTop: "0.375rem" }}
+                  style={{ fontSize: "0.95rem", color: "rgba(255,255,255,0.5)", marginTop: "0.25rem" }}
                 >
                   {pagination.total.toLocaleString()} titles found
                 </motion.p>
@@ -250,60 +218,7 @@ export default function ResultsContent() {
           />
         )}
 
-        {/* Search placeholder — for when search is wired up */}
-        {isSearch && (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "5rem 1rem",
-              gap: "1rem",
-              textAlign: "center",
-            }}
-          >
-            <div
-              style={{
-                width: "4rem",
-                height: "4rem",
-                borderRadius: "50%",
-                background: "rgba(255,255,255,0.05)",
-                backdropFilter: "blur(12px)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Search style={{ width: "1.5rem", height: "1.5rem", color: "rgba(255,255,255,0.4)" }} />
-            </div>
-            <h2 style={{ fontSize: "1.25rem", fontWeight: 700, color: "#fff", margin: 0 }}>
-              Search coming soon
-            </h2>
-            <p style={{ fontSize: "0.875rem", color: "rgba(255,255,255,0.4)", maxWidth: "28rem" }}>
-              The search system is being built. For now, browse anime by genre using the genre strip below.
-            </p>
-            <Link
-              href="/"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.375rem",
-                padding: "0.625rem 1.5rem",
-                borderRadius: "var(--radius-full)",
-                background: "linear-gradient(135deg, var(--accent), var(--accent-secondary))",
-                color: "#fff",
-                fontSize: "0.875rem",
-                fontWeight: 700,
-                textDecoration: "none",
-                transition: "opacity 0.2s",
-              }}
-            >
-              Back to Home
-            </Link>
-          </div>
-        )}
+        {/* Search placeholder removed to reduce clutter. Future search results will render below. */}
 
         {/* Genre anime grid */}
         {isGenre && (
@@ -327,92 +242,76 @@ export default function ResultsContent() {
 
         {/* ── Pagination ──────────────────────────────────────────────────── */}
         {isGenre && !isLoading && (pagination.hasNextPage || page > 1) && (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.75rem", marginTop: "3.5rem", flexWrap: "wrap" }}>
-
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "1rem", marginTop: "4rem", flexWrap: "wrap" }}>
             {/* Prev */}
             <motion.button
-              whileHover={{ scale: page <= 1 ? 1 : 1.04 }}
-              whileTap={{ scale: 0.96 }}
+              whileHover={{ scale: page <= 1 ? 1 : 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
               aria-label="Previous page"
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "0.375rem",
-                padding: "0.65rem 1.4rem",
-                borderRadius: "var(--radius-full)",
-                background: "rgba(255,255,255,0.06)",
-                backdropFilter: "blur(12px)",
-                WebkitBackdropFilter: "blur(12px)",
-                border: "1px solid rgba(255,255,255,0.10)",
-                color: page <= 1 ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.85)",
-                fontSize: "0.875rem",
+                gap: "0.5rem",
+                padding: "0.5rem 1.25rem",
+                borderRadius: "9999px",
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                color: page <= 1 ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.9)",
+                fontSize: "0.9rem",
                 fontWeight: 600,
                 cursor: page <= 1 ? "not-allowed" : "pointer",
-                opacity: page <= 1 ? 0.5 : 1,
-                transition: "all 0.25s",
-                fontFamily: "var(--font-sans)",
+                transition: "all 0.2s",
               }}
             >
-              <ChevronLeft style={{ width: "1rem", height: "1rem" }} />
+              <ChevronLeft style={{ width: "1.2rem", height: "1.2rem" }} />
               Prev
             </motion.button>
 
-            {/* Page indicator — glassmorphism style */}
+            {/* Page indicator */}
             <div style={{
               display: "flex",
               alignItems: "center",
-              gap: "0.4rem",
-              padding: "0.65rem 1.4rem",
-              borderRadius: "var(--radius-full)",
-              background: `linear-gradient(135deg, ${accentColor}20, ${accentColor}0d)`,
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
-              border: `1px solid ${accentColor}35`,
-              boxShadow: `0 4px 20px ${accentColor}15`,
-              fontSize: "0.875rem",
-              fontWeight: 700,
+              gap: "0.5rem",
+              padding: "0.5rem 1.25rem",
+              borderRadius: "9999px",
+              background: "rgba(255,255,255,0.1)",
+              border: `1px solid ${accentColor}50`,
+              fontSize: "0.9rem",
+              fontWeight: 600,
               color: "#fff",
             }}>
-              <span style={{ color: "rgba(255,255,255,0.5)", fontWeight: 400 }}>Page</span>
-              <span style={{ color: accentColor }}>{page}</span>
+              Page <span style={{ color: accentColor }}>{page}</span>
               {pagination.lastPage > 1 && (
-                <span style={{ color: "rgba(255,255,255,0.35)", fontWeight: 400 }}>/ {pagination.lastPage}</span>
+                <span style={{ color: "rgba(255,255,255,0.5)", fontWeight: 400 }}>of {pagination.lastPage}</span>
               )}
             </div>
 
             {/* Next */}
             <motion.button
-              whileHover={{ scale: !pagination.hasNextPage ? 1 : 1.04 }}
-              whileTap={{ scale: 0.96 }}
+              whileHover={{ scale: !pagination.hasNextPage ? 1 : 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setPage((p) => p + 1)}
               disabled={!pagination.hasNextPage}
               aria-label="Next page"
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "0.375rem",
-                padding: "0.65rem 1.4rem",
-                borderRadius: "var(--radius-full)",
-                background: !pagination.hasNextPage
-                  ? "rgba(255,255,255,0.06)"
-                  : `linear-gradient(135deg, ${accentColor}cc, ${accentColor})`,
-                backdropFilter: "blur(12px)",
-                WebkitBackdropFilter: "blur(12px)",
-                border: `1px solid ${!pagination.hasNextPage ? "rgba(255,255,255,0.10)" : accentColor}`,
-                color: !pagination.hasNextPage ? "rgba(255,255,255,0.25)" : "#fff",
-                fontSize: "0.875rem",
+                gap: "0.5rem",
+                padding: "0.5rem 1.25rem",
+                borderRadius: "9999px",
+                background: !pagination.hasNextPage ? "rgba(255,255,255,0.05)" : `linear-gradient(135deg, ${accentColor}cc, ${accentColor})`,
+                border: `1px solid ${!pagination.hasNextPage ? "rgba(255,255,255,0.1)" : accentColor}`,
+                color: !pagination.hasNextPage ? "rgba(255,255,255,0.3)" : "#fff",
+                fontSize: "0.9rem",
                 fontWeight: 600,
                 cursor: !pagination.hasNextPage ? "not-allowed" : "pointer",
-                opacity: !pagination.hasNextPage ? 0.5 : 1,
-                boxShadow: !pagination.hasNextPage ? "none" : `0 6px 24px ${accentColor}40`,
-                transition: "all 0.25s",
-                fontFamily: "var(--font-sans)",
+                transition: "all 0.2s",
               }}
             >
               Next
-              <ChevronRight style={{ width: "1rem", height: "1rem" }} />
+              <ChevronRight style={{ width: "1.2rem", height: "1.2rem" }} />
             </motion.button>
           </div>
         )}
