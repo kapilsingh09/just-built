@@ -111,3 +111,7 @@ npm run dev          # runs on :3000
 - [ ] **Episode pagination** — currently page 1 only; add `?page=N` support to hooks + backend
 - [ ] **Arc metadata** — integrate AniList/AniDB for true season/arc episode grouping
 - [ ] **Kitsu studios** — studios need a separate `?include=producers` relationship fetch
+
+---
+
+*“Your cinematic anime journey begins here.”* ✨
