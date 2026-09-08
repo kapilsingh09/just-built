@@ -44,11 +44,26 @@ const transformKitsuAnime = (anime) => {
     // This is handled in getKitsuAnimeById, not here
   }
 
+  // ── Extract English, Japanese, and Canonical titles ────────────────────────
+  const englishTitle =
+    attrs.titles?.en ??
+    attrs.titles?.en_us ??
+    null;
+
+  const canonicalTitle = attrs.canonicalTitle ?? null;
+  const romajiTitle = attrs.titles?.en_jp ?? canonicalTitle;
+  const japaneseTitle = attrs.titles?.ja_jp ?? null;
+  const preferredTitle = englishTitle || canonicalTitle;
+
   return {
-    id:          anime.id,
-    source:      "kitsu",         // ← used by AnimeCard to build the detail page URL
-    title:       attrs.canonicalTitle                           ?? null,
-    synopsis:    attrs.synopsis                                 ?? null,
+    id:             anime.id,
+    source:         "kitsu",         // ← used by AnimeCard to build the detail page URL
+    title:          preferredTitle,
+    titleEnglish:   englishTitle,
+    titleJapanese:  japaneseTitle,
+    canonicalTitle: canonicalTitle,
+    romajiTitle:    romajiTitle,
+    synopsis:       attrs.synopsis                                 ?? null,
     image:       posterImage,                  // high-res portrait poster
     bannerImage: coverImage ?? posterImage,    // landscape cover; fall back to poster
     score:       attrs.averageRating
@@ -138,7 +153,7 @@ const fetchKitsuWithCache = async (cacheKey, kitsuUrl, label) => {
 // Cache key: anime:popular
 // ─────────────────────────────────────────────────────────────────────────────
 export const getKitsuPopular = async () => {
-  const cacheKey = "anime:popular";
+  const cacheKey = "anime:v2:popular";
   const kitsuUrl = `${KITSU_BASE_URL}/anime?page[limit]=20&sort=-userCount`;
 
   return fetchKitsuWithCache(cacheKey, kitsuUrl, "getKitsuPopular");
@@ -149,10 +164,10 @@ export const getKitsuPopular = async () => {
 // GET /api/anime/top-rated
 //
 // Sorted by -averageRating → highest community score on Kitsu.
-// Cache key: anime:top-rated
+// Cache key: anime:v2:top-rated
 // ─────────────────────────────────────────────────────────────────────────────
 export const getKitsuTopRated = async () => {
-  const cacheKey = "anime:top-rated";
+  const cacheKey = "anime:v2:top-rated";
   const kitsuUrl = `${KITSU_BASE_URL}/anime?page[limit]=20&sort=-averageRating`;
 
   return fetchKitsuWithCache(cacheKey, kitsuUrl, "getKitsuTopRated");
@@ -163,10 +178,10 @@ export const getKitsuTopRated = async () => {
 // GET /api/anime/latest
 //
 // Sorted by -startDate → newest anime by air date on Kitsu.
-// Cache key: anime:latest
+// Cache key: anime:v2:latest
 // ─────────────────────────────────────────────────────────────────────────────
 export const getKitsuLatest = async () => {
-  const cacheKey = "anime:latest";
+  const cacheKey = "anime:v2:latest";
   const kitsuUrl = `${KITSU_BASE_URL}/anime?page[limit]=20&sort=-startDate`;
 
   return fetchKitsuWithCache(cacheKey, kitsuUrl, "getKitsuLatest");
@@ -221,7 +236,7 @@ export const getKitsuSeasonalPopular = async () => {
     seasonEnd   = `${year}-12-31`;
   }
 
-  const cacheKey = `anime:seasonal:${year}:${season}`;
+  const cacheKey = `anime:v2:seasonal:${year}:${season}`;
   const SEASONAL_TTL = 21600; // 6 hours
 
   // ── Step 1: Check Redis cache ──────────────────────────────────────────────
@@ -291,7 +306,7 @@ export const getKitsuSeasonalPopular = async () => {
 // ║  Cache key : kitsu:detail:{id}   TTL: 6 hours                              ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 export const getKitsuAnimeById = async (id) => {
-  const cacheKey  = `kitsu:detail:${id}`;
+  const cacheKey  = `kitsu:v2:detail:${id}`;
   const DETAIL_TTL = 21600; // 6 hours
 
   // ── Step 1: Check Redis ────────────────────────────────────────────────────

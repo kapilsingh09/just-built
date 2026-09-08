@@ -27,7 +27,7 @@ const containerVariants = {
 
 const itemVariants = {
   hidden: { opacity: 0, y: 18, scale: 0.97 },
-  show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.32, ease: "easeOut" } },
+  show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.32, ease: "easeOut" as const } },
 };
 
 export default function AnimeGrid({ data, isLoading = false, totalCount, onAddToPlaylist }: AnimeGridProps) {

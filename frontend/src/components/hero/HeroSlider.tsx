@@ -101,7 +101,7 @@ export default function HeroSlider({ anime, onAddToPlaylist }: HeroSliderProps) 
               {/* Sharp main image on top */}
               <Image
                 src={(currentAnime.bannerImage || currentAnime.image) as string}
-                alt={currentAnime.title || "Anime"}
+                alt={currentAnime.titleEnglish || currentAnime.title || "Anime"}
                 fill
                 priority
                 quality={100}
@@ -161,10 +161,29 @@ export default function HeroSlider({ anime, onAddToPlaylist }: HeroSliderProps) 
                   )}
                 </div>
 
-                {/* Title */}
-                <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white leading-tight mb-4 drop-shadow-lg">
-                  {currentAnime.title}
+                {/* Title (English first) */}
+                <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white leading-tight mb-2 drop-shadow-lg">
+                  {currentAnime.titleEnglish || currentAnime.title}
                 </h1>
+
+                {/* Secondary Title (Romaji / Japanese if distinct) */}
+                {(() => {
+                  const mainTitle = currentAnime.titleEnglish || currentAnime.title;
+                  const secondaryTitle =
+                    currentAnime.titleEnglish && currentAnime.title && currentAnime.title !== currentAnime.titleEnglish
+                      ? currentAnime.title
+                      : (currentAnime.canonicalTitle && currentAnime.canonicalTitle !== mainTitle)
+                        ? currentAnime.canonicalTitle
+                        : (currentAnime.titleJapanese || null);
+
+                  return secondaryTitle ? (
+                    <p className="text-sm sm:text-base font-medium text-white/60 mb-4 tracking-wide line-clamp-1">
+                      {secondaryTitle}
+                    </p>
+                  ) : (
+                    <div className="mb-2" />
+                  );
+                })()}
 
                 {/* Description */}
                 {currentAnime.synopsis && (
@@ -257,8 +276,8 @@ export default function HeroSlider({ anime, onAddToPlaylist }: HeroSliderProps) 
           <button
             key={i}
             onClick={() => goTo(i)}
-            className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${i === current
-              ? "w-8 border-3 bg-white "
+            className={`h-0.5 rounded-full transition-all duration-300 cursor-pointer ${i === current
+              ? "w-6 bg-white "
               : "w-3 bg-white/40 hover:bg-white/60"
               }`}
             aria-label={`Go to slide ${i + 1}`}

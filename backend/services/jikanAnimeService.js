@@ -17,25 +17,34 @@ const getCurrentSeason = () => {
 // ─────────────────────────────────────────────────────────────────────────────
 // Helper: Transform a single raw Jikan anime entry into our API shape
 // ─────────────────────────────────────────────────────────────────────────────
-const transformJikanAnime = (data) => ({
-  id:          data.mal_id,
-  source:      "jikan",           // ← used by AnimeCard to build the detail page URL
-  title:       data.title,
-  synopsis:    data.synopsis,
-  score:       data.score,
-  episodes:    data.episodes,
-  image:       data.images?.jpg?.image_url       ?? null,
-  bannerImage: data.images?.jpg?.large_image_url ?? null,
-  status:      data.status,
-  year:        data.year,
-  season:      data.season,
-  type:        data.type,
-  rating:      data.rating,
-  genres:      data.genres?.map((g) => g.name)   ?? [],
-  trailerUrl:  data.trailer?.embed_url           ?? null,
-  duration:    data.duration                     ?? null,
-  studios:     data.studios?.map((s) => s.name)  ?? [],
-});
+const transformJikanAnime = (data) => {
+  const englishTitle = data.title_english || null;
+  const defaultTitle = data.title || null;
+  const preferredTitle = englishTitle || defaultTitle;
+
+  return {
+    id:             data.mal_id,
+    source:         "jikan",           // ← used by AnimeCard to build the detail page URL
+    title:          preferredTitle,
+    titleEnglish:   englishTitle,
+    titleJapanese:  data.title_japanese               ?? null,
+    canonicalTitle: defaultTitle,
+    synopsis:       data.synopsis,
+    score:          data.score,
+    episodes:       data.episodes,
+    image:          data.images?.jpg?.image_url       ?? null,
+    bannerImage:    data.images?.jpg?.large_image_url ?? null,
+    status:         data.status,
+    year:           data.year,
+    season:         data.season,
+    type:           data.type,
+    rating:         data.rating,
+    genres:         data.genres?.map((g) => g.name)   ?? [],
+    trailerUrl:     data.trailer?.embed_url           ?? null,
+    duration:       data.duration                     ?? null,
+    studios:        data.studios?.map((s) => s.name)  ?? [],
+  };
+};
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -51,7 +60,7 @@ const transformJikanAnime = (data) => ({
 export const getPopularAnime = async () => {
   const year     = new Date().getFullYear();
   const season   = getCurrentSeason();
-  const cacheKey = `anime:popular:${year}:${season}`;
+  const cacheKey = `anime:v2:popular:${year}:${season}`;
 
   // ── Step 1: Check Redis cache ──────────────────────────────────────────────
   const cached = await redisService.get(cacheKey);
@@ -109,7 +118,7 @@ export const getPopularAnime = async () => {
 // ║  Rate limit: Jikan allows ~3 req/sec — Redis absorbs repeated visits.       ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 export const getJikanAnimeById = async (id) => {
-  const cacheKey = `jikan:detail:${id}`;
+  const cacheKey = `jikan:v2:detail:${id}`;
 
   // ── Step 1: Check Redis ────────────────────────────────────────────────────
   const cached = await redisService.get(cacheKey);

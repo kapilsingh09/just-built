@@ -15,20 +15,24 @@
 //           route to call when a card is clicked. Always keep this populated.
 // ─────────────────────────────────────────────────────────────────────────────
 export interface Anime {
-  id:          number | string;
-  source:      "jikan" | "kitsu"; // ← which API this anime came from
-  title:       string | null;
-  synopsis:    string | null;
-  image:       string | null;
-  bannerImage: string | null;
-  score:       number | null;   // out of 10 for both Jikan and Kitsu
-  episodes:    number | null;
-  status:      string | null;
-  year:        number | null;
-  season:      string | null;
-  type:        string | null;   // e.g. "TV", "Movie", "OVA"
-  rating:      string | null;   // content rating, e.g. "PG-13", "R17+"
-  genres:      string[];        // Jikan: filled; Kitsu: filled on detail page
+  id:              number | string;
+  source:          "jikan" | "kitsu"; // ← which API this anime came from
+  title:           string | null;
+  titleEnglish?:   string | null;     // English title if available
+  titleJapanese?:  string | null;     // Japanese title in kanji/kana
+  canonicalTitle?: string | null;     // Canonical / original Romaji title
+  romajiTitle?:    string | null;     // Romaji transliteration
+  synopsis:        string | null;
+  image:           string | null;
+  bannerImage:     string | null;
+  score:           number | null;   // out of 10 for both Jikan and Kitsu
+  episodes:        number | null;
+  status:          string | null;
+  year:            number | null;
+  season:          string | null;
+  type:            string | null;   // e.g. "TV", "Movie", "OVA"
+  rating:          string | null;   // content rating, e.g. "PG-13", "R17+"
+  genres:          string[];        // Jikan: filled; Kitsu: filled on detail page
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -4,7 +4,7 @@ import { faEllipsis, faGlobe, faPlay, faTv } from '@fortawesome/free-solid-svg-i
 import { faInstagram, faXTwitter, faLinkedin, faGithub } from '@fortawesome/free-brands-svg-icons';
 
 // 1. Icon mapping object matching your required syntax format
-const byPrefixAndName = {
+const byPrefixAndName: Record<string, Record<string, any>> = {
   fas: {
     play: faPlay,
     tv: faTv,
@@ -17,7 +17,7 @@ const byPrefixAndName = {
     linkedin: faLinkedin,
     github: faGithub,
   },
-} as const;
+};
 
 // 2. Define data structures for cleaner readability
 const SOCIAL_LINKS = [
@@ -28,11 +28,25 @@ const SOCIAL_LINKS = [
   { prefix: 'fas', name: 'globe', label: 'Web', href: 'https://yourwebsite.com' },
 ] as const;
 
-const FOOTER_SECTIONS = [
+interface FooterLinkItem {
+  text: string;
+  href: string;
+  prefix?: 'fas' | 'fab';
+  name?: string;
+  badge?: string;
+  badgeType?: 'text' | 'outline';
+}
+
+interface FooterSection {
+  title: string;
+  links: readonly FooterLinkItem[];
+}
+
+const FOOTER_SECTIONS: readonly FooterSection[] = [
   {
     title: 'Navigation',
     links: [
-      { text: 'Trending Now', href: '/trending', prefix: 'fas', name: 'play', badge: 'Hot' },
+      { text: 'Trending Now', href: '/trending', prefix: 'fas', name: 'play', badge: 'Hot', badgeType: 'text' },
       { text: 'Top Anime', href: '/top' },
       { text: 'Simulcasts', href: '/simulcasts' },
       { text: 'Schedule', href: '/schedule' },
@@ -56,7 +70,7 @@ const FOOTER_SECTIONS = [
       { text: 'DMCA', href: '/dmca' },
     ],
   },
-] as const;
+];
 
 export default function Footer() {
   return (
